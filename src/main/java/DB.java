@@ -42,7 +42,7 @@ public class DB {
             throw new RuntimeException(e);
         }
     }
-//한
+
     public ArrayList<String> getSkillBookName(String name) {
         if (db.size() == 0){
             readDB();

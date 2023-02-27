@@ -2,6 +2,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -84,9 +85,17 @@ public class DiscordBot {
 
     public void divGold(MessageChannel channel , String gold , String name) throws RuntimeException{
         try {
-            String title = name.isEmpty() ? "경매계산기" : name;
+            String title;
             int goldInteger = Integer.parseInt(gold);
             EmbedBuilder eb = new EmbedBuilder();
+
+            if (name.isEmpty()){
+                title = "경매계산기";
+            }else {
+                title = name;
+                MessageEmbed.Field field = new MessageEmbed.Field("최근거래가 : " +gold + " gold" , "",true);
+                eb.addField(field);
+            }
             eb.setTitle(title);
             eb.addField("4인N빵", Math.round(goldInteger * 0.7215) + " gold", true);
             eb.addField("4인선점", Math.round(goldInteger * 0.64772) + " gold", true);
