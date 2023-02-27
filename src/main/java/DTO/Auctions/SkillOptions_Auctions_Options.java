@@ -1,9 +1,9 @@
-package DTO;
+package DTO.Auctions;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class SkillOptions_Auctions {
+public class SkillOptions_Auctions_Options {
     @SerializedName("Value")
     @Expose
     private Integer Value;
@@ -29,7 +29,7 @@ public class SkillOptions_Auctions {
         return Class;
     }
 
-    public DTO.Tripods[] getTripods() {
+    public DTO.Auctions.Tripods[] getTripods() {
         return Tripods;
     }
 

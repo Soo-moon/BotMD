@@ -1,4 +1,5 @@
 import DTO.*;
+import DTO.Auctions.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -83,11 +84,11 @@ public class API {
     }
 
     public void auctionsOptions(){
-        APIService.auctionsOptions().enqueue(new Callback<AuctionsOption>() {
+        Callback<AuctionsOption> callback = new Callback<AuctionsOption>() {
             @Override
             public void onResponse(Call<AuctionsOption> call, Response<AuctionsOption> response) {
                 String CLASS = "바드";
-                for (SkillOptions_Auctions sa : response.body().getSkillOptions_Auctions()){
+                for (SkillOptions_Auctions_Options sa : response.body().getSkillOptions_Auctions()){
                     if (sa.classGet().equals(CLASS)){
                         String name = sa.getText();
                         ArrayList<Tripods> tripods = new ArrayList<>();
@@ -109,6 +110,33 @@ public class API {
 
             @Override
             public void onFailure(Call<AuctionsOption> call, Throwable t) {
+                System.out.println("failure "+ t.getMessage());
+                t.printStackTrace();
+            }
+        };
+    }
+
+    public void auctions_Item_Tripods(String characterClass ,SearchDetailOption searchDetailOption){
+        RequestAuctionItems requestAuctionItems = new RequestAuctionItems();
+        requestAuctionItems.CharacterClass = characterClass;
+        requestAuctionItems.SkillOptions = new SearchDetailOption[]{searchDetailOption};
+        APIService.auctions_Items(requestAuctionItems).enqueue(new Callback<Auctions_items_Response>() {
+            @Override
+            public void onResponse(Call<Auctions_items_Response> call, Response<Auctions_items_Response> response) {
+                int totalItemPrice = 0;
+                int totalCount = 0;
+                for (AuctionItem auctionItem : response.body().Items){
+                    totalItemPrice += auctionItem.AuctionInfo.BuyPrice;
+                    System.out.println("auctionItem.AuctionInfo.BuyPrice : " +auctionItem.AuctionInfo.BuyPrice);
+                    totalCount++;
+                }
+                System.out.println("className : " + characterClass);
+                System.out.println("searchDetailOption " + searchDetailOption.FirstOption +" : " +searchDetailOption.SecondOption);
+                System.out.println("ItemPrice " + (totalItemPrice / totalCount));
+            }
+
+            @Override
+            public void onFailure(Call<Auctions_items_Response> call, Throwable t) {
                 System.out.println("failure "+ t.getMessage());
                 t.printStackTrace();
             }

@@ -1,3 +1,4 @@
+import DTO.Auctions.SearchDetailOption;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -32,7 +33,11 @@ public class DiscordBot {
         public void onReady(ReadyEvent event) {
             super.onReady(event);
             api = serverManager.getApi();
-            api.auctionsOptions();
+            SearchDetailOption searchDetailOption = new SearchDetailOption();
+            searchDetailOption.FirstOption = 21020;
+            searchDetailOption.SecondOption = 1;
+            searchDetailOption.MinValue = 5;
+            api.auctions_Item_Tripods("바드" , searchDetailOption);
         }
 
         @Override

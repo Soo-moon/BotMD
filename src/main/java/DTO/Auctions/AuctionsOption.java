@@ -1,4 +1,4 @@
-package DTO;
+package DTO.Auctions;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -14,11 +14,11 @@ public class AuctionsOption {
 
     @SerializedName("SkillOptions")
     @Expose
-    private SkillOptions_Auctions[] SkillOptions_Auctions;
+    private DTO.Auctions.SkillOptions_Auctions_Options[] SkillOptions_Auctions_Options;
 
     @SerializedName("EtcOptions")
     @Expose
-    private EtcOptions[] EtcOptions;
+    private EtcOptions_Auctions_Options[] EtcOptions_Auctions_Options;
 
     @SerializedName("Categories")
     @Expose
@@ -36,7 +36,7 @@ public class AuctionsOption {
     @Expose
     private String[] Classes;
 
-    public DTO.SkillOptions_Auctions[] getSkillOptions_Auctions() {
-        return SkillOptions_Auctions;
+    public SkillOptions_Auctions_Options[] getSkillOptions_Auctions() {
+        return SkillOptions_Auctions_Options;
     }
 }
