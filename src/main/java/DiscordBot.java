@@ -39,7 +39,7 @@ public class DiscordBot {
             Message message = event.getMessage();
             MessageChannel channel = event.getChannel();
 
-            if (user.isBot() && !message.getContentRaw().startsWith(prefix))return;
+            if (user.isBot() || !message.getContentRaw().startsWith(prefix))return;
 
             ArrayList<String> args = new ArrayList<>(Arrays.asList(message.getContentRaw().split(" ")));
             String command = args.get(0).replace(prefix , "");
