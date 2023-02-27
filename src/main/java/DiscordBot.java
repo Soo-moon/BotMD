@@ -32,6 +32,7 @@ public class DiscordBot {
         public void onReady(ReadyEvent event) {
             super.onReady(event);
             api = serverManager.getApi();
+            api.auctionsOptions();
         }
 
         @Override

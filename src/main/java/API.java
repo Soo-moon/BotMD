@@ -1,6 +1,4 @@
-import DTO.Item;
-import DTO.ItemDTO;
-import DTO.ItemSearchParam;
+import DTO.*;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,12 +13,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class API {
     private APIService APIService;
     private ServerManager serverManager;
     private DiscordBot bot;
+
+    private HashMap<String , Tripods[]> testMap = new HashMap<>();
 
     public void create(String URL , String Key , ServerManager serverManager) throws RuntimeException{
         try {
@@ -79,6 +80,39 @@ public class API {
                 }
             });
         }
+    }
+
+    public void auctionsOptions(){
+        APIService.auctionsOptions().enqueue(new Callback<AuctionsOption>() {
+            @Override
+            public void onResponse(Call<AuctionsOption> call, Response<AuctionsOption> response) {
+                String CLASS = "바드";
+                for (SkillOptions_Auctions sa : response.body().getSkillOptions_Auctions()){
+                    if (sa.classGet().equals(CLASS)){
+                        String name = sa.getText();
+                        ArrayList<Tripods> tripods = new ArrayList<>();
+                        for (Tripods tripod : sa.getTripods()){
+                            if (tripod.getGem()) continue;
+                            tripods.add(tripod);
+                        }
+                        testMap.put(name, tripods.toArray(new Tripods[tripods.size()]));
+                    }
+                }
+                int count = 0;
+                for (String name : testMap.keySet()){
+                    System.out.println("name : " + name + " testMap.get(name).length :" +testMap.get(name).length);
+                    count += testMap.get(name).length;
+                }
+
+                System.out.println("count : " + count);
+            }
+
+            @Override
+            public void onFailure(Call<AuctionsOption> call, Throwable t) {
+                System.out.println("failure "+ t.getMessage());
+                t.printStackTrace();
+            }
+        });
     }
 
     public void makeFile(String filePath){
