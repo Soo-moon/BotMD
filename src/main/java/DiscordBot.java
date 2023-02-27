@@ -1,4 +1,4 @@
-import DTO.Auctions.SearchDetailOption;
+import DTO.Auctions.items.SearchDetailOption;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;

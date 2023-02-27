@@ -1,4 +1,4 @@
-package DTO.Auctions;
+package DTO.Auctions.items;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,4 +1,4 @@
-package DTO.Auctions;
+package DTO.Auctions.Options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -6,15 +6,15 @@ import com.google.gson.annotations.SerializedName;
 public class Tripods {
     @SerializedName("Value")
     @Expose
-    private Integer Value;
+    public Integer Value;
 
     @SerializedName("Text")
     @Expose
-    private String Text;
+    public String Text;
 
     @SerializedName("IsGem")
     @Expose
-    private Boolean IsGem;
+    public Boolean IsGem;
 
     public Integer getValue() {
         return Value;

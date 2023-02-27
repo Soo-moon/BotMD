@@ -1,18 +1,18 @@
-package DTO.Auctions;
+package DTO.Auctions.Options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class EtcOptions_Auctions_Options {
+public class EtcSubs {
     @SerializedName("Value")
     @Expose
-    private Integer Value;
+    public Integer Value;
 
     @SerializedName("Text")
     @Expose
-    private String Text;
+    public String Text;
 
-    @SerializedName("EtcSubs")
+    @SerializedName("Class")
     @Expose
-    private EtcSubs[] EtcSubs;
+    public String Class;
 }

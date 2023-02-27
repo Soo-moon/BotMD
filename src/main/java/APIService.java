@@ -1,6 +1,6 @@
-import DTO.Auctions.AuctionsOption;
-import DTO.Auctions.Auctions_items_Response;
-import DTO.Auctions.RequestAuctionItems;
+import DTO.Auctions.Options.AuctionsOption;
+import DTO.Auctions.items.Auction;
+import DTO.Auctions.items.RequestAuctionItems;
 import DTO.ItemDTO;
 import DTO.ItemSearchParam;
 import retrofit2.Call;
@@ -12,7 +12,7 @@ public interface APIService {
     Call<AuctionsOption> auctionsOptions();
 
     @POST("/auctions/items")
-    Call<Auctions_items_Response> auctions_Items(@Body RequestAuctionItems requestAuctionItems);
+    Call<Auction> auctions_Items(@Body RequestAuctionItems requestAuctionItems);
 
     @POST("/markets/items")
     Call<ItemDTO> searchItemPrice(@Body ItemSearchParam itemSearchParam);

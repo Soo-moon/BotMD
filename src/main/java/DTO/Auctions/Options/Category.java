@@ -1,18 +1,18 @@
-package DTO.Auctions;
+package DTO.Auctions.Options;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Categories_Auctions {
+public class Category {
     @SerializedName("Subs")
     @Expose
-    private CategoryItem[] Subs;
+    public CategoryItem[] Subs;
 
     @SerializedName("Code")
     @Expose
-    private Integer Code;
+    public Integer Code;
 
     @SerializedName("CodeName")
     @Expose
-    private String CodeName;
+    public String CodeName;
 }

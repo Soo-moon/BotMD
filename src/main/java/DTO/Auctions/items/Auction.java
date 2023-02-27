@@ -1,9 +1,9 @@
-package DTO.Auctions;
+package DTO.Auctions.items;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Auctions_items_Response {
+public class Auction {
     @SerializedName("PageNo")
     @Expose
     public Integer PageNo;
