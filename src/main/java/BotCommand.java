@@ -3,7 +3,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public enum BotCommand{
-    AUCTIONS(Arrays.asList("10","20")),
+    AUCTIONS(Arrays.asList("xv","ㅌㅍ","트포")),
     MARKETS(Arrays.asList("wr","ㅈㄱ","전각")),
     GOLD(Arrays.asList("ra","ㄱㅁ","경매"));
 

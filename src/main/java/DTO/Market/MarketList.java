@@ -1,4 +1,4 @@
-package DTO;
+package DTO.Market;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -24,36 +24,20 @@ import com.google.gson.annotations.SerializedName;
  * }
  * */
 
-public class ItemDTO {
+public class MarketList {
     @SerializedName("PageNo")
     @Expose
-    private String pageNo;
+    public Integer pageNo;
 
     @SerializedName("PageSize")
     @Expose
-    private String pageSize;
+    public Integer pageSize;
 
     @SerializedName("TotalCount")
     @Expose
-    private String totalCount;
+    public Integer totalCount;
 
     @SerializedName("Items")
     @Expose
-    private Item[] items;
-
-    public String getPageNo() {
-        return pageNo;
-    }
-
-    public String getPageSize() {
-        return pageSize;
-    }
-
-    public String getTotalCount() {
-        return totalCount;
-    }
-
-    public Item[] getItems() {
-        return items;
-    }
+    public MarketItem[] marketItems;
 }

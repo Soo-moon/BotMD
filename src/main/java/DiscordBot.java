@@ -68,7 +68,11 @@ public class DiscordBot {
             }catch (NoSuchElementException e ){
                 channel.sendMessage("명령어 - !전각 (전각이름) , !경매 (금액)").queue();
                 e.printStackTrace();
-            }catch (Exception e){
+            }catch (NumberFormatException e){
+                channel.sendMessage("금액은 숫자로 입력해주세요").queue();
+                e.printStackTrace();
+            }
+            catch (Exception e){
                 channel.sendMessage("그런거 없어여").queue();
                 e.printStackTrace();
             }
@@ -86,15 +90,18 @@ public class DiscordBot {
     }
 
     public void divGold(MessageChannel channel, String msg) {
-        divGold(channel, msg,"");
+        try {
+            int gold = Integer.parseInt(msg);
+            divGold(channel, gold,"");
+        }catch (NumberFormatException e){
+            throw new NumberFormatException("");
+        }
     }
 
-    public void divGold(MessageChannel channel , String gold , String name) throws RuntimeException{
+    public void divGold(MessageChannel channel , Integer gold , String name) throws RuntimeException{
         try {
             String title;
-            int goldInteger = Integer.parseInt(gold);
             EmbedBuilder eb = new EmbedBuilder();
-
             if (name.isEmpty()){
                 title = "경매계산기";
             }else {
@@ -103,11 +110,11 @@ public class DiscordBot {
                 eb.addField(field);
             }
             eb.setTitle(title);
-            eb.addField("4인N빵", Math.round(goldInteger * 0.7215) + " gold", true);
-            eb.addField("4인선점", Math.round(goldInteger * 0.64772) + " gold", true);
+            eb.addField("4인N빵", Math.round(gold * 0.7215) + " gold", true);
+            eb.addField("4인선점", Math.round(gold * 0.64772) + " gold", true);
             eb.addBlankField(false);
-            eb.addField("8인N빵", Math.round(goldInteger * 0.83125) + " gold", true);
-            eb.addField("8인선점", Math.round(goldInteger * 0.75568)+" gold", true);
+            eb.addField("8인N빵", Math.round(gold * 0.83125) + " gold", true);
+            eb.addField("8인선점", Math.round(gold * 0.75568)+" gold", true);
             channel.sendMessageEmbeds(eb.build()).queue();
         }catch (Exception e){
             throw new RuntimeException();

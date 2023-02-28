@@ -1,4 +1,3 @@
-import DTO.*;
 import DTO.Auctions.Options.AuctionsOption;
 import DTO.Auctions.Options.SkillOption;
 import DTO.Auctions.Options.Tripods;
@@ -6,6 +5,9 @@ import DTO.Auctions.items.Auction;
 import DTO.Auctions.items.AuctionItem;
 import DTO.Auctions.items.RequestAuctionItems;
 import DTO.Auctions.items.SearchDetailOption;
+import DTO.Market.MarketItem;
+import DTO.Market.MarketList;
+import DTO.Market.requestMarketItems;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -67,22 +69,22 @@ public class API {
                 str = str.split("] ")[1];
             }
 
-            APIService.searchItemPrice("40000", "전설", null, str).enqueue(new Callback<ItemDTO>() {
+            APIService.searchItemPrice("40000", "전설", null, str).enqueue(new Callback<MarketList>() {
                 @Override
-                public void onResponse(Call<ItemDTO> call, Response<ItemDTO> response) {
-                    Item item = response.body().getItems()[0];
-                    if (Integer.parseInt(response.body().getTotalCount()) > 1){
-                        for (Item items : response.body().getItems()){
-                            if (items.getName().equals(searchName)){
-                                item = items;
+                public void onResponse(Call<MarketList> call, Response<MarketList> response) {
+                    MarketItem marketItem = response.body().marketItems[0];
+                    if (response.body().totalCount > 1){
+                        for (MarketItem items : response.body().marketItems){
+                            if (items.name.equals(searchName)){
+                                marketItem = items;
                             }
                         }
                     }
-                    bot.divGold(channel , item.getRecentPrice() , item.getName());
+                    bot.divGold(channel , marketItem.recentPrice , marketItem.name);
                 }
 
                 @Override
-                public void onFailure(Call<ItemDTO> call, Throwable t) {
+                public void onFailure(Call<MarketList> call, Throwable t) {
                     System.out.println("failure "+ t.getMessage());
                 }
             });
@@ -156,22 +158,22 @@ public class API {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        APIService.searchItemPrice("40000","전설",null,"").enqueue(new Callback<ItemDTO>() {
+        APIService.searchItemPrice("40000","전설",null,"").enqueue(new Callback<MarketList>() {
             @Override
-            public void onResponse(Call<ItemDTO> call, Response<ItemDTO> response) {
-                double pageDouble =  Double.parseDouble(response.body().getTotalCount()) / 10 ;
+            public void onResponse(Call<MarketList> call, Response<MarketList> response) {
+                double pageDouble =  response.body().totalCount / 10 ;
                 int page = (int) Math.ceil(pageDouble);
 
-                ItemSearchParam itemSearchParam = new ItemSearchParam();
-                itemSearchParam.setCategoryCode("40000");
-                itemSearchParam.setItemGrade("전설");
+                requestMarketItems requestMarketItems = new requestMarketItems();
+                requestMarketItems.categoryCode = 40000;
+                requestMarketItems.itemGrade = "전설";
                 for (int i = 1; i <= page; i++){
-                    itemSearchParam.setPageNo(String.valueOf(i));
-                    APIService.searchItemPrice(itemSearchParam).enqueue(new Callback<ItemDTO>() {
+                    requestMarketItems.pageNo = i;
+                    APIService.searchItemPrice(requestMarketItems).enqueue(new Callback<MarketList>() {
                         @Override
-                        public void onResponse(@NotNull Call<ItemDTO> call, @NotNull Response<ItemDTO> response) {
-                            for (Item item : response.body().getItems()){
-                                String line = item.getName()+ "//" +item.getId() +"\n";
+                        public void onResponse(@NotNull Call<MarketList> call, @NotNull Response<MarketList> response) {
+                            for (MarketItem marketItem : response.body().marketItems){
+                                String line = marketItem.name+ "//" + marketItem.id +"\n";
                                 byte[] a = line.getBytes();
                                 try {
                                     fileOutputStream.write(a);
@@ -182,7 +184,7 @@ public class API {
                         }
 
                         @Override
-                        public void onFailure(Call<ItemDTO> call, Throwable t) {
+                        public void onFailure(Call<MarketList> call, Throwable t) {
                             System.out.println("makeFile failure "+ t.getMessage());
                         }
                     });
@@ -190,7 +192,7 @@ public class API {
             }
 
             @Override
-            public void onFailure(Call<ItemDTO> call, Throwable t) {
+            public void onFailure(Call<MarketList> call, Throwable t) {
                 System.out.println("failure "+ t.getMessage());
             }
         });

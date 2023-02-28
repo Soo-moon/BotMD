@@ -1,8 +1,8 @@
 import DTO.Auctions.Options.AuctionsOption;
 import DTO.Auctions.items.Auction;
 import DTO.Auctions.items.RequestAuctionItems;
-import DTO.ItemDTO;
-import DTO.ItemSearchParam;
+import DTO.Market.MarketList;
+import DTO.Market.requestMarketItems;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -15,11 +15,11 @@ public interface APIService {
     Call<Auction> auctions_Items(@Body RequestAuctionItems requestAuctionItems);
 
     @POST("/markets/items")
-    Call<ItemDTO> searchItemPrice(@Body ItemSearchParam itemSearchParam);
+    Call<MarketList> searchItemPrice(@Body requestMarketItems requestMarketItems);
 
     @FormUrlEncoded
     @POST("/markets/items")
-    Call<ItemDTO> searchItemPrice(@Field("CategoryCode") String categoryCode , @Field("ItemGrade") String ItemGrade , @Field("ItemTier")Integer ItemTier, @Field("ItemName")String ItemName);
+    Call<MarketList> searchItemPrice(@Field("CategoryCode") String categoryCode , @Field("ItemGrade") String ItemGrade , @Field("ItemTier")Integer ItemTier, @Field("ItemName")String ItemName);
 }
 
 /** CategoryCode
