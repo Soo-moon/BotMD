@@ -14,7 +14,7 @@ public class SearchDetailOption {
 
     @SerializedName("MinValue")
     @Expose
-    public Integer MinValue;
+    public Integer MinValue = 5;
 
     @SerializedName("MaxValue")
     @Expose

@@ -1,4 +1,3 @@
-import DTO.Auctions.items.SearchDetailOption;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -33,11 +32,9 @@ public class DiscordBot {
         public void onReady(ReadyEvent event) {
             super.onReady(event);
             api = serverManager.getApi();
-            SearchDetailOption searchDetailOption = new SearchDetailOption();
-            searchDetailOption.FirstOption = 21020;
-            searchDetailOption.SecondOption = 1;
-            searchDetailOption.MinValue = 5;
-            api.auctions_Item_Tripods("바드" , searchDetailOption);
+//            api.make_AuctionsOptions("바드",Word.rootDir + "/db/바드");
+            DB db = serverManager.getDB();
+            db.createBookDB();
         }
 
         @Override
@@ -63,7 +60,10 @@ public class DiscordBot {
                         divGold(channel,msg);
                         break;
                     }
-                    case AUCTIONS: break;
+                    case AUCTIONS: {
+//                        api.searchTripods(msg ,channel);
+                        break;
+                    }
                 }
             }catch (NoSuchElementException e ){
                 channel.sendMessage("명령어 - !전각 (전각이름) , !경매 (금액)").queue();

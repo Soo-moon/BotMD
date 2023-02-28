@@ -13,7 +13,7 @@ import com.google.gson.annotations.SerializedName;
  "PageNo": 0,
  "SortCondition": "ASC"
  }**/
-public class requestMarketItems {
+public class RequestMarketItems {
     @SerializedName("Sort")
     @Expose
     public String sort = "GRADE";

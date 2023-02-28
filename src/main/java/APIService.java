@@ -2,7 +2,7 @@ import DTO.Auctions.Options.AuctionsOption;
 import DTO.Auctions.items.Auction;
 import DTO.Auctions.items.RequestAuctionItems;
 import DTO.Market.MarketList;
-import DTO.Market.requestMarketItems;
+import DTO.Market.RequestMarketItems;
 import retrofit2.Call;
 import retrofit2.http.*;
 
@@ -15,7 +15,7 @@ public interface APIService {
     Call<Auction> auctions_Items(@Body RequestAuctionItems requestAuctionItems);
 
     @POST("/markets/items")
-    Call<MarketList> searchItemPrice(@Body requestMarketItems requestMarketItems);
+    Call<MarketList> searchItemPrice(@Body RequestMarketItems requestMarketItems);
 
     @FormUrlEncoded
     @POST("/markets/items")

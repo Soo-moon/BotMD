@@ -26,7 +26,7 @@ public class RequestAuctionItems {
 
     @SerializedName("Sort")
     @Expose
-    public String Sort;
+    public String Sort="BUY_PRICE";
 
     @SerializedName("CategoryCode")
     @Expose

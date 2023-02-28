@@ -4,4 +4,5 @@ public class Word {
     public static final String root = "server/system";
     public static final String rootDir = home + "/" + root;
     public static final String propFile = rootDir + "/config.properties";
+    public static final String dbDir = home + "/" + root + "/" + "db/";
 }
