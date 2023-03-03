@@ -32,9 +32,6 @@ public class DiscordBot {
         public void onReady(ReadyEvent event) {
             super.onReady(event);
             api = serverManager.getApi();
-//            api.make_AuctionsOptions("바드",Word.rootDir + "/db/바드");
-            DB db = serverManager.getDB();
-            db.createBookDB();
         }
 
         @Override
@@ -61,7 +58,7 @@ public class DiscordBot {
                         break;
                     }
                     case AUCTIONS: {
-//                        api.searchTripods(msg ,channel);
+                        api.request_tripod(msg);
                         break;
                     }
                 }

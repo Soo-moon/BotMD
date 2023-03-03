@@ -6,7 +6,7 @@ import java.util.Properties;
 public class ServerManager {
     public Boolean isTest = System.getProperty("os.name").contains("Windows");
 
-    private DB db;
+    private final DB db = new DB(this);;
     private final API api = new API();
     private final DiscordBot bot = new DiscordBot();
     private final Properties serverProp = new Properties();
@@ -26,9 +26,7 @@ public class ServerManager {
         try {
             api.create(prop("api.url"), prop("api.key") ,this);
             bot.create(prop("bot.key"),this);
-            db = new DB(this,api,0,"");
-            db.makeFile();
-
+            db.create();
         } catch (Exception e) {
             throw new RuntimeException("server create error ", e);
         }
