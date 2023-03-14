@@ -1,4 +1,4 @@
-public class Word {
+public class Server {
     public static final String home = System.getProperty("user.home");
     public static final String propFileName = "config.properties";
     public static final String root = "server/system";

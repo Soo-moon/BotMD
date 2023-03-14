@@ -23,7 +23,7 @@ public class DB {
 
     private API api;
 
-    private final String path = Word.DB_DIR;
+    private final String path = Server.DB_DIR;
 
     public DB(ServerManager serverManager) {
         this.serverManager = serverManager;
@@ -37,7 +37,7 @@ public class DB {
 
     public void readData() {
         try {
-            File dir = new File(Word.DB_root);
+            File dir = new File(Server.DB_root);
             File[] fileList = dir.listFiles();
             for (File file : fileList) {
                 JsonReader jsonReader = new JsonReader(new BufferedReader(new FileReader(file)));
@@ -174,7 +174,7 @@ public class DB {
 
     public void createFile(String name, byte[] b) {
         try {
-            String fileName = Word.DB_DIR + name;
+            String fileName = Server.DB_DIR + name;
             BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(fileName, false));
             fileOutputStream.write(b);
             fileOutputStream.flush();
@@ -190,7 +190,7 @@ public class DB {
         ArrayList<ApiSearchTripod> apiSearchTripods = new ArrayList<>();
         Work work = () -> {
             try {
-                BufferedReader reader = new BufferedReader(new FileReader((Word.rootDir + "/db/" + className)));
+                BufferedReader reader = new BufferedReader(new FileReader((Server.rootDir + "/db/" + className)));
                 String jsonObj = reader.readLine();
                 JsonArray characterDB = new Gson().fromJson(jsonObj, JsonArray.class);
                 for (int i = 0; i < characterDB.size() - 1; i++) {

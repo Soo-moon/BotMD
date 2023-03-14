@@ -1,11 +1,13 @@
 import com.jcraft.jsch.*;
 
 import java.io.*;
+import java.util.logging.Logger;
 
 public class SSHServer {
     private static final String serverIP = "3.37.89.233";
     private static final int port = 22;
     private static final String user = "ubuntu";
+    private static final Logger log = Logger.getLogger("SSH");
 
     private ChannelSftp channelSftp;
 
@@ -20,7 +22,7 @@ public class SSHServer {
     private void connect() throws JSchException {
         try {
             JSch jsch = new JSch();
-            jsch.addIdentity(Word.rootDir + "/key/moon.pem");
+            jsch.addIdentity(Server.rootDir + "/key/moon.pem");
 
             Session session = jsch.getSession(user, serverIP, port);
             session.setConfig("StrictHostKeyChecking", "no");
@@ -37,9 +39,9 @@ public class SSHServer {
         InputStream is = null;
         FileOutputStream fops = null;
         try {
-            channelSftp.cd(Word.root);
+            channelSftp.cd(Server.root);
             is = channelSftp.get(name);
-            fops = new FileOutputStream(Word.rootDir + "/" + name , false);
+            fops = new FileOutputStream(Server.rootDir + "/" + name , false);
             int read;
             byte[] bytes = new byte[1024];
             while ((read = is.read(bytes)) != -1) {

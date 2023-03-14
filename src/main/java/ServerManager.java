@@ -15,10 +15,10 @@ public class ServerManager {
     ServerManager() throws SftpException, IOException {
         if (isTest) {
             SSHServer sshServer = new SSHServer();
-            sshServer.download(Word.propFileName);
+            sshServer.download(Server.propFileName);
         }
 
-        serverProp.load(new FileInputStream(Word.propFile));
+        serverProp.load(new FileInputStream(Server.propFile));
 
         ServiceStart();
     }
