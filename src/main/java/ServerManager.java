@@ -6,8 +6,9 @@ import java.util.Properties;
 public class ServerManager {
     public Boolean isTest = System.getProperty("os.name").contains("Windows");
 
+    private API api;
     private final DB db = new DB(this);;
-    private final API api = new API();
+
     private final DiscordBot bot = new DiscordBot();
     private final Properties serverProp = new Properties();
 
@@ -24,7 +25,7 @@ public class ServerManager {
 
     public void ServiceStart() {
         try {
-            api.create(prop("api.url"), prop("api.key") ,this);
+            api = new API(this , prop("api.url"), prop("api.key"));
             bot.create(prop("bot.key"),this);
             db.create();
         } catch (Exception e) {
@@ -43,4 +44,6 @@ public class ServerManager {
     public DiscordBot getBot(){return bot;}
 
     public DB getDB(){return db;}
+
+
 }

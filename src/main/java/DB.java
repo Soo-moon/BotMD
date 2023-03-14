@@ -25,7 +25,6 @@ public class DB {
 
     private final String path = Word.DB_DIR;
 
-
     public DB(ServerManager serverManager) {
         this.serverManager = serverManager;
         debug = serverManager.isTest;

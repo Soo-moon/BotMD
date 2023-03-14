@@ -28,12 +28,11 @@ public class API {
     private APIService apiService;
     private ServerManager serverManager;
     private DiscordBot bot;
+    private ApiListener apiListener;
 
-
-    public void create(String URL, String Key, ServerManager serverManager) throws RuntimeException {
+    public API(ServerManager serverManager , String URL, String Key){
         try {
             this.serverManager = serverManager;
-            bot = serverManager.getBot();
             OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
                         .addHeader("accept", "application/json")
@@ -50,6 +49,33 @@ public class API {
                     .build();
 
             apiService = retrofit.create(APIService.class);
+
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void create(String URL, String Key, ServerManager serverManager) throws RuntimeException {
+        try {
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
+                Request request = chain.request().newBuilder()
+                        .addHeader("accept", "application/json")
+                        .addHeader("Authorization", "Bearer " + Key)
+                        .addHeader("content-Type", "application/json")
+                        .build();
+                return chain.proceed(request);
+            }).build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(client)
+                    .baseUrl(URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            apiService = retrofit.create(APIService.class);
+            this.serverManager = serverManager;
+            bot = serverManager.getBot();
         } catch (Exception e) {
             throw new RuntimeException("API create Fail");
         }
