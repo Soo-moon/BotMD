@@ -6,4 +6,5 @@ public class Server {
     public static final String propFile = rootDir + "/config.properties";
     public static final String DB_DIR = home + "/" + root + "/" + "db/";
     public static final String DB_root = home + "/" + root + "/" + "db";
+    public static final String Log_path = rootDir + "/log/";
 }

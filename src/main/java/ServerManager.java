@@ -5,7 +5,9 @@ import java.util.Properties;
 
 public class ServerManager {
     public Boolean isTest = System.getProperty("os.name").contains("Windows");
+    private static String tag = "ServerManager";
 
+    private Log log;
     private API api;
     private final DB db = new DB(this);;
 
@@ -13,6 +15,8 @@ public class ServerManager {
     private final Properties serverProp = new Properties();
 
     ServerManager() throws SftpException, IOException {
+        log = new Log();
+
         if (isTest) {
             SSHServer sshServer = new SSHServer();
             sshServer.download(Server.propFileName);
@@ -21,6 +25,7 @@ public class ServerManager {
         serverProp.load(new FileInputStream(Server.propFile));
 
         ServiceStart();
+        log.d("start !! ");
     }
 
     public void ServiceStart() {
