@@ -12,21 +12,21 @@ public class Log {
 
     public Log() throws IOException {
         logger = Logger.getGlobal();
-        if (logger.getHandlers() == null){
+        if (logger.getHandlers().length == 0){
             FileHandler fh = new FileHandler(Server.Log_path + "log.txt",true);
             CustomFormat mFormat = new CustomFormat();
             fh.setFormatter(mFormat);
             logger.addHandler(fh);
         }
-        //todo
     }
 
     public void d(String msg){
         logger.info(msg);
     }
 
-    public void e(String msg){
+    public void e(String msg , Exception e){
         logger.severe(msg);
+        logger.severe(e.toString());
     }
 
     public class CustomFormat extends Formatter{

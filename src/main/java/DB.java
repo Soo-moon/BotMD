@@ -32,7 +32,7 @@ public class DB {
 
     public void create() {
         api = serverManager.getApi();
-        createBookDB();
+//        createBookDB();
     }
 
     public void readData() {
