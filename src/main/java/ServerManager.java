@@ -5,22 +5,21 @@ import java.util.Properties;
 
 public class ServerManager {
     public Boolean isTest = System.getProperty("os.name").contains("Windows");
-    private static String tag = "ServerManager";
+
+    private static final String config = "config.properties";
+    private final Properties prop = new Properties();
 
     private Log log = new Log();
     private API api;
     private final DB db = new DB(this);;
-
     private final DiscordBot bot = new DiscordBot();
-    private final Properties serverProp = new Properties();
 
     ServerManager() throws SftpException, IOException {
         if (isTest) {
             SSHServer sshServer = new SSHServer();
-            sshServer.download(Server.propFileName);
+            sshServer.download(config);
         }
-
-        serverProp.load(new FileInputStream(Server.propFile));
+        prop.load(new FileInputStream(Server.propFile));
 
         ServiceStart();
         log.d("start !! ");
@@ -37,7 +36,7 @@ public class ServerManager {
     }
 
     public String prop(String key){
-        return serverProp.getProperty(key);
+        return prop.getProperty(key);
     }
 
     public API getApi(){

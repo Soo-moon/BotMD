@@ -7,22 +7,19 @@ public class SSHServer {
     private static final String serverIP = "3.37.89.233";
     private static final int port = 22;
     private static final String user = "ubuntu";
-    private static final Logger log = Logger.getLogger("SSH");
+    private static final String rootDIR = System.getProperty("user.home") + "/server/system/";
 
+    private final Log log = new Log();
     private ChannelSftp channelSftp;
 
     public SSHServer() {
-        try {
-            connect();
-        } catch (JSchException e) {
-            e.printStackTrace();
-        }
+        connect();
     }
 
-    private void connect() throws JSchException {
+    private void connect() {
         try {
             JSch jsch = new JSch();
-            jsch.addIdentity(Server.rootDir + "/key/moon.pem");
+            jsch.addIdentity(rootDIR + "key/moon.pem");
 
             Session session = jsch.getSession(user, serverIP, port);
             session.setConfig("StrictHostKeyChecking", "no");
@@ -31,17 +28,17 @@ public class SSHServer {
             channelSftp = (ChannelSftp) session.openChannel("sftp");
             channelSftp.connect();
         } catch (JSchException e) {
-            throw new JSchException("Session connect error : " + e.getMessage());
+            log.e("Session connect error : ", e);
         }
     }
 
-    public void download (String name) throws SftpException, IOException {
+    public void download(String name){
         InputStream is = null;
         FileOutputStream fops = null;
         try {
-            channelSftp.cd(Server.root);
+            channelSftp.cd("server/system");
             is = channelSftp.get(name);
-            fops = new FileOutputStream(Server.rootDir + "/" + name , false);
+            fops = new FileOutputStream(rootDIR + name, false);
             int read;
             byte[] bytes = new byte[1024];
             while ((read = is.read(bytes)) != -1) {
@@ -49,9 +46,9 @@ public class SSHServer {
             }
         } catch (SftpException e) {
             String msg = "sftp connect error : " + e.getMessage();
-            throw new SftpException(0, msg);
+            log.e(msg , e);
         } catch (IOException e) {
-            throw new IOException("server File IO error : " + e.getMessage());
+            log.e("server File IO error : " , e);
         }
     }
 }

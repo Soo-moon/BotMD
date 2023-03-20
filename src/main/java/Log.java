@@ -10,13 +10,17 @@ public class Log {
     Logger logger;
 
 
-    public Log() throws IOException {
-        logger = Logger.getGlobal();
-        if (logger.getHandlers().length == 0){
-            FileHandler fh = new FileHandler(Server.Log_path + "log.txt",true);
-            CustomFormat mFormat = new CustomFormat();
-            fh.setFormatter(mFormat);
-            logger.addHandler(fh);
+    public Log(){
+        try {
+            logger = Logger.getGlobal();
+            if (logger.getHandlers().length == 0){
+                FileHandler fh = new FileHandler(Server.Log_path + "log.txt",true);
+                CustomFormat mFormat = new CustomFormat();
+                fh.setFormatter(mFormat);
+                logger.addHandler(fh);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -26,7 +30,7 @@ public class Log {
 
     public void e(String msg , Exception e){
         logger.severe(msg);
-        logger.severe(e.toString());
+        logger.severe(e.getMessage());
     }
 
     public class CustomFormat extends Formatter{
