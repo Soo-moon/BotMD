@@ -1,51 +1,53 @@
-import com.jcraft.jsch.*;
-
 import java.io.*;
 import java.util.Properties;
 
 public class ServerManager {
     public Boolean isTest = System.getProperty("os.name").contains("Windows");
 
+    private static final String rootDIR = System.getProperty("user.home") + "/server/system/";
     private static final String config = "config.properties";
+
+    private final Log log = new Log();
     private final Properties prop = new Properties();
 
-    private Log log = new Log();
     private API api;
-    private final DB db = new DB(this);;
-    private final DiscordBot bot = new DiscordBot();
+    private DB db;
+    private DiscordBot discordBot;
 
-    ServerManager() throws SftpException, IOException {
+    ServerManager() throws IOException {
         if (isTest) {
             SSHServer sshServer = new SSHServer();
             sshServer.download(config);
         }
-        prop.load(new FileInputStream(Server.propFile));
+        prop.load(new FileInputStream(rootDIR + config));
 
-        ServiceStart();
+        String apiKey = prop.getProperty("api.key");
+        String botKey = prop.getProperty("bot.key");
+
+        serverCreate(apiKey, botKey);
         log.d("start !! ");
     }
 
-    public void ServiceStart() {
-        try {
-            api = new API(this , prop("api.url"), prop("api.key"));
-            bot.create(prop("bot.key"),this);
-            db.create();
-        } catch (Exception e) {
-            throw new RuntimeException("server create error ", e);
-        }
+    public void serverCreate(String apiKey, String botKey) {
+        api = new API(this , apiKey);
+        db = new DB(this , api);
+        discordBot = new DiscordBot(this , botKey);
     }
 
-    public String prop(String key){
+    public String getProperty(String key){
         return prop.getProperty(key);
     }
 
-    public API getApi(){
+    public API getApi() {
         return api;
     }
 
-    public DiscordBot getBot(){return bot;}
+    public DiscordBot getBot() {
+        return discordBot;
+    }
 
-    public DB getDB(){return db;}
-
+    public DB getDB() {
+        return db;
+    }
 
 }

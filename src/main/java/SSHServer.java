@@ -1,7 +1,6 @@
 import com.jcraft.jsch.*;
 
 import java.io.*;
-import java.util.logging.Logger;
 
 public class SSHServer {
     private static final String serverIP = "3.37.89.233";

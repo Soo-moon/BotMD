@@ -23,8 +23,17 @@ public class DiscordBot {
             GatewayIntent.MESSAGE_CONTENT
     };
 
+    private String key;
+
     private ServerManager serverManager;
     private boolean debug;
+
+    public DiscordBot(ServerManager serverManager , String botKey) {
+        this.serverManager = serverManager;
+        this.key = botKey;
+
+        create(key , serverManager);
+    }
 
     public class BotListener extends ListenerAdapter{
         private API api;

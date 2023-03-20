@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -14,7 +16,7 @@ public class Log {
         try {
             logger = Logger.getGlobal();
             if (logger.getHandlers().length == 0){
-                FileHandler fh = new FileHandler(Server.Log_path + "log.txt",true);
+                FileHandler fh = new FileHandler(System.getProperty("user.home") + "/server/system/log/log.txt",true);
                 CustomFormat mFormat = new CustomFormat();
                 fh.setFormatter(mFormat);
                 logger.addHandler(fh);

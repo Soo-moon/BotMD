@@ -10,60 +10,126 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.io.*;
 import java.util.*;
 
 public class DB {
-    private static final HashMap<String, JsonArray> db = new HashMap<>();
+    private final HashMap<String, JsonArray> db = new HashMap<>();
+    private final Log log = new Log();
 
-    private final boolean debug;
-    private final ServerManager serverManager;
-
+    private ServerManager serverManager;
     private API api;
 
-    private final String path = Server.DB_DIR;
-
-    public DB(ServerManager serverManager) {
+    public DB(ServerManager serverManager, API api) {
         this.serverManager = serverManager;
-        debug = serverManager.isTest;
+        this.api = api;
+        readDB();
     }
 
-    public void create() {
-        api = serverManager.getApi();
-//        createBookDB();
-    }
-
-    public void readData() {
+    private void readDB() {
         try {
-            File dir = new File(Server.DB_root);
-            File[] fileList = dir.listFiles();
-            for (File file : fileList) {
-                JsonReader jsonReader = new JsonReader(new BufferedReader(new FileReader(file)));
-                jsonReader.setLenient(true);
-                JsonArray jsonArray =  JsonParser.parseReader(jsonReader).getAsJsonArray();
-                db.put(file.getName(), jsonArray);
-                System.out.println("DB put done : " + file.getName());
+            String dir = System.getProperty("user.home") + serverManager.getProperty("db.dir");
+            File[] files = new File(dir).listFiles();
+            if (files != null) {
+                if (files.length > 0) {
+                    log.d("try File read size : " + files.length);
+                    for (File file : files) {
+                        JsonReader jsonReader = new JsonReader(new BufferedReader(new FileReader(file)));
+                        jsonReader.setLenient(true);
+                        JsonArray jsonArray = JsonParser.parseReader(jsonReader).getAsJsonArray();
+                        db.put(file.getName(), jsonArray);
+                        log.d("read DataFile : " + file.getName());
+                    }
+                }
+                log.d("read Done !! size : " + files.length);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            updateSkillBook();
+        } catch (FileNotFoundException e) {
+            log.e("db file not Found", e);
         }
     }
 
-    public ArrayList<String> getSkillBookName(String name){
-        ArrayList<String> data = new ArrayList<>();
-        if (!db.containsKey("book")){
-            readData();
+    private void makeFile(String name, byte[] b) {
+        try {
+            String fileName = serverManager.getProperty("db.dir") + name;
+            BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(fileName, false));
+            fileOutputStream.write(b);
+            fileOutputStream.flush();
+            log.d(fileName + ".create !!");
+        } catch (Exception e) {
+            log.e("make file error.", e);
         }
-        JsonArray jsonData = db.get("book");
-        for (int i = 0; i < jsonData.size(); i++){
+    }
+
+    public void updateSkillBook() {
+        Thread worker = new Thread(() -> {
+            try {
+                Queue<Call<MarketList>> workList = new LinkedList<>();
+                int totalPage = 1;
+                JsonArray item = new JsonArray();
+
+                for (int i = 1; i <= totalPage; i++) {
+                    Call<MarketList> c = api.requestBookData(i);
+                    workList.add(api.requestBookData(i));
+
+                    if (i == 1) {
+                        Response<MarketList> r = c.execute();
+                        if (r.isSuccessful()){
+                            double pageD = r.body().totalCount;
+                            totalPage = (int) Math.ceil(pageD / 10);
+                        }
+                    }
+                }
+
+                log.d(Thread.currentThread().getName() + ": create !!  size : " + workList.size());
+
+                while (!workList.isEmpty()) {
+                    Call<MarketList> call = workList.peek();
+                    Response<MarketList> response = call.execute();
+
+                    if (response.code() == 200) {
+                        if (response.body() != null) {
+                            for (MarketItem marketItem : response.body().marketItems) {
+                                item.add(marketItem.name);
+                            }
+                            workList.poll();
+                        }
+                    } else if (response.code() == 429) {
+                        log.d("api code 420 ");
+                        Thread.sleep(65000);
+                    } else {
+                        log.d("api fail code : " + response.code());
+                    }
+                }
+
+                makeFile("skillBook", item.toString().getBytes());
+                log.d(Thread.currentThread().getName() + " done !!");
+
+            } catch (IOException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        worker.setName("updateSkillBook");
+        worker.start();
+    }
+
+    public ArrayList<String> getSkillBook(String skillName) {
+        ArrayList<String> data = new ArrayList<>();
+        if (!db.containsKey("skillBook")) {
+            updateSkillBook();
+        }
+        JsonArray jsonData = db.get("skillBook");
+        for (int i = 0; i < jsonData.size(); i++) {
             String bookName = String.valueOf(jsonData.get(i));
             int temp = 0;
             int index = -1;
-            for (int t = 0; t < name.length(); t++) {
+            for (int t = 0; t < skillName.length(); t++) {
                 for (int j = 0; j < bookName.length(); j++) {
-                    if (name.charAt(t) == bookName.charAt(j)) {
+                    if (skillName.charAt(t) == bookName.charAt(j)) {
                         if (index > j) {
                             break;
                         }
@@ -75,57 +141,14 @@ public class DB {
                     break;
                 }
             }
-            if (temp == (name.length())) {
-                if (debug) System.out.println("add dataArray -> " + bookName);
+            if (temp == (skillName.length())) {
                 data.add(bookName);
             }
         }
-        if (debug) System.out.println(data);
         return data;
     }
 
-    public void createBookDB() {
-        Runnable runnable = () -> {
-            while (true) {
-                try {
-                    int page;
-                    int totalPage = 1;
-                    boolean flag = false;
-                    JsonArray item = new JsonArray();
-                    for (page = 1; page <= totalPage; page++) {
-                        Response<MarketList> response = api.requestBookData(page).execute();
-                        if (response.isSuccessful()) {
-                            flag = true;
-                            if (page == 1) {
-                                double pageD = response.body().totalCount;
-                                totalPage = (int) Math.ceil(pageD / 10);
-                            }
-                            for (MarketItem marketItem : response.body().marketItems) {
-                                System.out.println(marketItem.name);
-                                item.add(marketItem.name);
-                            }
-                        } else {
-                            flag = false;
-                            System.out.println("create fail BookDB");
-                            System.out.println("retry BookDB ");
-                            Thread.sleep(65000);
-                        }
-                    }
-                    if (flag) {
-                        createFile("book", item.toString().getBytes());
-                        break;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Thread thread = new Thread(runnable);
-        thread.setName("bookCreate");
-        thread.start();
-    }
-
-    public void createCharacterDB(String characterClass , Work work) {
+    public void createCharacterDB(String characterClass) {
         Runnable runnable = () -> {
             while (true) {
                 try {
@@ -157,9 +180,8 @@ public class DB {
                         Thread.sleep(65000);
                     }
                     if (flag) {
-                        createFile(characterClass, characterDB.toString().getBytes());
-                        db.put(characterClass , characterDB);
-                        work.done();
+                        makeFile(characterClass, characterDB.toString().getBytes());
+                        db.put(characterClass, characterDB);
                         break;
                     }
                 } catch (Exception e) {
@@ -172,55 +194,40 @@ public class DB {
         thread.start();
     }
 
-    public void createFile(String name, byte[] b) {
+    public ArrayList<ApiSearchTripod> getCharacterDB(String className) {
+        ArrayList<ApiSearchTripod> apiSearchTripods = new ArrayList<>();
+
         try {
-            String fileName = Server.DB_DIR + name;
-            BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(fileName, false));
-            fileOutputStream.write(b);
-            fileOutputStream.flush();
-            System.out.println(fileName + ".create!");
+            BufferedReader reader = new BufferedReader(new FileReader((serverManager.getProperty("db.dir") + className)));
+            String jsonObj = reader.readLine();
+            JsonArray characterDB = new Gson().fromJson(jsonObj, JsonArray.class);
+            for (int i = 0; i < characterDB.size() - 1; i++) {
+                ApiSearchTripod apiSearchTripod = new ApiSearchTripod();
+                JsonObject jsonObject = (JsonObject) characterDB.get(i);
+                JsonObject tripods = jsonObject.getAsJsonObject("Tripods");
+                for (String skillName : tripods.keySet()) {
+                    apiSearchTripod.SkillName = skillName;
+                    apiSearchTripod.FirstOption = jsonObject.get("FirstOption").getAsInt();
+                }
+                apiSearchTripod.tripods = tripods;
+                apiSearchTripods.add(apiSearchTripod);
+            }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
 
-    public ArrayList<ApiSearchTripod> getCharacterDB(String className) {
-        ArrayList<ApiSearchTripod> apiSearchTripods = new ArrayList<>();
-        Work work = () -> {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader((Server.rootDir + "/db/" + className)));
-                String jsonObj = reader.readLine();
-                JsonArray characterDB = new Gson().fromJson(jsonObj, JsonArray.class);
-                for (int i = 0; i < characterDB.size() - 1; i++) {
-                    ApiSearchTripod apiSearchTripod = new ApiSearchTripod();
-                    JsonObject jsonObject = (JsonObject) characterDB.get(i);
-                    JsonObject tripods = jsonObject.getAsJsonObject("Tripods");
-                    for (String skillName : tripods.keySet()) {
-                        apiSearchTripod.SkillName = skillName;
-                        apiSearchTripod.FirstOption = jsonObject.get("FirstOption").getAsInt();
-                    }
-                    apiSearchTripod.tripods = tripods;
-                    apiSearchTripods.add(apiSearchTripod);
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
 
-        if (!db.containsKey(className)){
-            createCharacterDB(className , work);
-        }else {
-            work.done();
+        if (!db.containsKey(className)) {
+            createCharacterDB(className);
         }
+
 
         return apiSearchTripods;
     }
 
-    public interface Work{
-        void done();
+    private boolean checkData(String name) {
+        return db.get(name) != null;
     }
 }

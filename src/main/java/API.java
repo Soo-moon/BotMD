@@ -1,34 +1,30 @@
 import DTO.ApiSearchTripod;
 import DTO.Auctions.Options.AuctionsOption;
-import DTO.Auctions.Options.SkillOption;
-import DTO.Auctions.Options.Tripods;
 import DTO.Auctions.items.*;
 import DTO.Market.MarketItem;
 import DTO.Market.MarketList;
 import DTO.Market.RequestMarketItems;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 
 public class API {
+    private static final String baseURL = "https://developer-lostark.game.onstove.com";
+
+    private final Log log = new Log();
+
     private APIService apiService;
     private ServerManager serverManager;
     private DiscordBot bot;
-    private ApiListener apiListener;
 
     public API(ServerManager serverManager , String URL, String Key){
         try {
@@ -49,10 +45,33 @@ public class API {
                     .build();
 
             apiService = retrofit.create(APIService.class);
-
-
         }catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    public API(ServerManager serverManager ,String apiKey) {
+        this.serverManager = serverManager;
+        bot = serverManager.getBot();
+        try {
+            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
+                Request request = chain.request().newBuilder()
+                        .addHeader("accept", "application/json")
+                        .addHeader("Authorization", "Bearer " + apiKey)
+                        .addHeader("content-Type", "application/json")
+                        .build();
+                return chain.proceed(request);
+            }).build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(client)
+                    .baseUrl(baseURL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            apiService = retrofit.create(APIService.class);
+        }catch (Exception e){
+            log.e("API create fail",e);
         }
     }
 
@@ -82,7 +101,7 @@ public class API {
     }
 
     public void searchItem(String itemName, MessageChannel channel) {
-        ArrayList<String> searchData = serverManager.getDB().getSkillBookName(itemName);
+        ArrayList<String> searchData = serverManager.getDB().getSkillBook(itemName);
 
         if (searchData.size() == 0) {
             throw new RuntimeException("데이터 없음");
@@ -109,7 +128,7 @@ public class API {
 
                 @Override
                 public void onFailure(Call<MarketList> call, Throwable t) {
-                    System.out.println("failure " + t.getMessage());
+                    log.d(t.getMessage());
                 }
             });
         }
@@ -177,7 +196,7 @@ public class API {
     }
 
     //done
-    public Call<MarketList> requestBookData(int page) throws IOException {
+    public Call<MarketList> requestBookData(int page){
         RequestMarketItems requestMarketItems = new RequestMarketItems();
         requestMarketItems.categoryCode = 40000;
         requestMarketItems.itemGrade = "전설";
