@@ -80,43 +80,15 @@ public class API {
         }
     }
 
-    public void create(String URL, String Key, ServerManager serverManager) throws RuntimeException {
-        try {
-
-
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(chain -> {
-                Request request = chain.request().newBuilder()
-                        .addHeader("accept", "application/json")
-                        .addHeader("Authorization", "Bearer " + Key)
-                        .addHeader("content-Type", "application/json")
-                        .build();
-                return chain.proceed(request);
-            }).build();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(URL)
-
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            apiService = retrofit.create(APIService.class);
-            this.serverManager = serverManager;
-            bot = serverManager.getBot();
-        } catch (Exception e) {
-            throw new RuntimeException("API create Fail");
-        }
-    }
-
     public void searchItem(String itemName, MessageChannel channel) {
         ArrayList<String> searchData = serverManager.getDB().getSkillBook(itemName);
 
         if (searchData.size() == 0) {
-            throw new RuntimeException("데이터 없음");
+            log.e("데이터 없음");
+            throw new RuntimeException();
         }
         for (String searchName : searchData) {
-            String str = searchName.replace("각인서", "").replace("\"" , "");
+            String str = searchName.replace(" 각인서", "").replace("\"" , "");
             if (str.contains("[")) {
                 str = str.split("] ")[1];
             }
@@ -137,7 +109,7 @@ public class API {
 
                 @Override
                 public void onFailure(Call<MarketList> call, Throwable t) {
-                    log.d(t.getMessage());
+                    log.e(t.getMessage());
                 }
             });
         }

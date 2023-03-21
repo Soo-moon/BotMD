@@ -35,6 +35,10 @@ public class Log {
         logger.severe(e.getMessage());
     }
 
+    public void e(String msg){
+        logger.severe(msg);
+    }
+
     public class CustomFormat extends Formatter{
 
         @Override

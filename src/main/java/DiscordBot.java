@@ -23,16 +23,16 @@ public class DiscordBot {
             GatewayIntent.MESSAGE_CONTENT
     };
 
-    private String key;
-
-    private ServerManager serverManager;
-    private boolean debug;
+    private final ServerManager serverManager;
+    private final Log log = new Log();
 
     public DiscordBot(ServerManager serverManager , String botKey) {
         this.serverManager = serverManager;
-        this.key = botKey;
 
-        create(key , serverManager);
+        JDA jda = JDABuilder.createDefault(botKey)
+                .enableIntents(Arrays.asList(botPermission))
+                .build();
+        jda.addEventListener(new BotListener());
     }
 
     public class BotListener extends ListenerAdapter{
@@ -54,7 +54,6 @@ public class DiscordBot {
             ArrayList<String> args = new ArrayList<>(Arrays.asList(message.getContentRaw().split(" ")));
             String command = args.get(0).replace(prefix , "");
             String msg = args.get(1);
-            if (debug) System.out.println(this.getClass().getSimpleName() + "command : " + command + " msg : " + msg);
 
             try {
                 switch (BotCommand.command(command)){
@@ -73,26 +72,16 @@ public class DiscordBot {
                 }
             }catch (NoSuchElementException e ){
                 channel.sendMessage("명령어 - !전각 (전각이름) , !경매 (금액)").queue();
-                e.printStackTrace();
+                log.e(e.getMessage());
             }catch (NumberFormatException e){
                 channel.sendMessage("금액은 숫자로 입력해주세요").queue();
-                e.printStackTrace();
+                log.e(e.getMessage());
             }
             catch (Exception e){
                 channel.sendMessage("그런거 없어여").queue();
-                e.printStackTrace();
+                log.e(e.getMessage());
             }
         }
-    }
-
-    public void create(String token , ServerManager serverManager){
-        this.serverManager = serverManager;
-        JDA jda = JDABuilder.createDefault(token)
-                .enableIntents(Arrays.asList(botPermission))
-                .build();
-        jda.addEventListener(new BotListener());
-
-        debug = serverManager.isTest;
     }
 
     public void divGold(MessageChannel channel, String msg) {
@@ -100,7 +89,7 @@ public class DiscordBot {
             int gold = Integer.parseInt(msg);
             divGold(channel, gold,"");
         }catch (NumberFormatException e){
-            throw new NumberFormatException("");
+            log.e(e.getMessage());
         }
     }
 
@@ -123,9 +112,7 @@ public class DiscordBot {
             eb.addField("8인선점", Math.round(gold * 0.75568)+" gold", true);
             channel.sendMessageEmbeds(eb.build()).queue();
         }catch (Exception e){
-            throw new RuntimeException();
+            log.e(e.getMessage());
         }
     }
-
-
 }
