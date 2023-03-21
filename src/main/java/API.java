@@ -70,6 +70,20 @@ public class API {
                     .build();
 
             apiService = retrofit.create(APIService.class);
+
+            Callback<MarketList> callback = new Callback<MarketList>() {
+                @Override
+                public void onResponse(Call<MarketList> call, Response<MarketList> response) {
+                    System.out.println("test1");
+                }
+
+                @Override
+                public void onFailure(Call<MarketList> call, Throwable t) {
+                    System.out.println("test2");
+                }
+            };
+
+            requestBookData(1).enqueue(callback);
         }catch (Exception e){
             log.e("API create fail",e);
         }

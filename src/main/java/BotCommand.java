@@ -19,7 +19,7 @@ public enum BotCommand{
         return Arrays.stream(BotCommand.values())
                 .filter(title -> title.check(code))
                 .findAny()
-                .orElseThrow();
+                .orElseThrow(RuntimeException::new);
     }
 
     private boolean check(String code){

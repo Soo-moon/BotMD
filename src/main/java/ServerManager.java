@@ -31,7 +31,7 @@ public class ServerManager {
     public void serverCreate(String apiKey, String botKey) {
         api = new API(this , apiKey);
         db = new DB(this , api);
-        discordBot = new DiscordBot(this , botKey);
+//        discordBot = new DiscordBot(this , botKey);
     }
 
     public String getProperty(String key){

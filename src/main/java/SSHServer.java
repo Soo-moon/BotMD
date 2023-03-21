@@ -10,6 +10,7 @@ public class SSHServer {
 
     private final Log log = new Log();
     private ChannelSftp channelSftp;
+    private Session session;
 
     public SSHServer() {
         connect();
@@ -20,7 +21,7 @@ public class SSHServer {
             JSch jsch = new JSch();
             jsch.addIdentity(rootDIR + "key/moon.pem");
 
-            Session session = jsch.getSession(user, serverIP, port);
+            session = jsch.getSession(user, serverIP, port);
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
 
@@ -48,6 +49,10 @@ public class SSHServer {
             log.e(msg , e);
         } catch (IOException e) {
             log.e("server File IO error : " , e);
+        }
+        finally {
+            channelSftp.disconnect();
+            session.disconnect();
         }
     }
 }
