@@ -55,7 +55,6 @@ public class Log {
 
             sb.append(record.getMessage());
             sb.append("\n");
-            System.out.println(sb);
             return sb.toString();
         }
 

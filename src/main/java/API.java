@@ -1,6 +1,9 @@
 import DTO.ApiSearchTripod;
 import DTO.Auctions.Options.AuctionsOption;
-import DTO.Auctions.items.*;
+import DTO.Auctions.items.Auction;
+import DTO.Auctions.items.AuctionItem;
+import DTO.Auctions.items.RequestAuctionItems;
+import DTO.Auctions.items.SearchDetailOption;
 import DTO.Market.MarketItem;
 import DTO.Market.MarketList;
 import DTO.Market.RequestMarketItems;
@@ -13,7 +16,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 
 
@@ -26,35 +33,33 @@ public class API {
     private ServerManager serverManager;
     private DiscordBot bot;
 
-    public API(ServerManager serverManager , String URL, String Key){
-        try {
-            this.serverManager = serverManager;
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
-                Request request = chain.request().newBuilder()
-                        .addHeader("accept", "application/json")
-                        .addHeader("Authorization", "Bearer " + Key)
-                        .addHeader("content-Type", "application/json")
-                        .build();
-                return chain.proceed(request);
-            }).build();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(client)
-                    .baseUrl(URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            apiService = retrofit.create(APIService.class);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
     public API(ServerManager serverManager ,String apiKey) {
         this.serverManager = serverManager;
         bot = serverManager.getBot();
         try {
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
+            final TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[]{};
+                        }
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .sslSocketFactory(sc.getSocketFactory() , (X509TrustManager)trustAllCerts[0])
+                    .addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
                         .addHeader("accept", "application/json")
                         .addHeader("Authorization", "Bearer " + apiKey)
@@ -70,20 +75,6 @@ public class API {
                     .build();
 
             apiService = retrofit.create(APIService.class);
-
-            Callback<MarketList> callback = new Callback<MarketList>() {
-                @Override
-                public void onResponse(Call<MarketList> call, Response<MarketList> response) {
-                    System.out.println("test1");
-                }
-
-                @Override
-                public void onFailure(Call<MarketList> call, Throwable t) {
-                    System.out.println("test2");
-                }
-            };
-
-            requestBookData(1).enqueue(callback);
         }catch (Exception e){
             log.e("API create fail",e);
         }
@@ -91,7 +82,10 @@ public class API {
 
     public void create(String URL, String Key, ServerManager serverManager) throws RuntimeException {
         try {
-            OkHttpClient client = new OkHttpClient.Builder().addInterceptor(chain -> {
+
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(chain -> {
                 Request request = chain.request().newBuilder()
                         .addHeader("accept", "application/json")
                         .addHeader("Authorization", "Bearer " + Key)
@@ -103,6 +97,7 @@ public class API {
             Retrofit retrofit = new Retrofit.Builder()
                     .client(client)
                     .baseUrl(URL)
+
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 

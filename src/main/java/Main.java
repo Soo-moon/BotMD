@@ -7,7 +7,6 @@ public class Main {
         try {
             Log log = new Log();
             ServerManager serverManager = new ServerManager();
-            log.d("main end ");
         } catch (Exception e) {
             e.printStackTrace();
         }

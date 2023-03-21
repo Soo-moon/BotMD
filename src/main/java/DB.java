@@ -22,16 +22,18 @@ public class DB {
 
     private ServerManager serverManager;
     private API api;
+    private String dir;
 
     public DB(ServerManager serverManager, API api) {
         this.serverManager = serverManager;
         this.api = api;
+
         readDB();
     }
 
     private void readDB() {
         try {
-            String dir = System.getProperty("user.home") + serverManager.getProperty("db.dir");
+            dir = System.getProperty("user.home") + serverManager.getProperty("db.dir");
             File[] files = new File(dir).listFiles();
             if (files != null) {
                 if (files.length > 0) {
@@ -54,8 +56,9 @@ public class DB {
 
     private void makeFile(String name, byte[] b) {
         try {
-            String fileName = serverManager.getProperty("db.dir") + name;
-            BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(fileName, false));
+            String fileName = dir + name;
+            File file = new File(fileName);
+            BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file, false));
             fileOutputStream.write(b);
             fileOutputStream.flush();
             log.d(fileName + ".create !!");
