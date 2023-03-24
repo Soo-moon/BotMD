@@ -1,12 +1,15 @@
-
-
 public class Main {
-    private static String tag = "main";
+    private static final Boolean isTest = System.getProperty("os.name").contains("Windows");
 
     public static void main(String[] args) {
         try {
-            Log log = new Log();
-            ServerManager serverManager = new ServerManager();
+            Log.init();
+
+            if (isTest) {
+                SSHServer sshServer = new SSHServer();
+                sshServer.download();
+            }
+//            ServerManager serverManager = new ServerManager();
         } catch (Exception e) {
             e.printStackTrace();
         }

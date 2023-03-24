@@ -241,7 +241,6 @@ public interface APIService {
  *         }
  *     ],
  */
-
 /**     auctionsCategories
  * "Categories": [
  {

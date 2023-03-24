@@ -48,7 +48,6 @@ public class DB {
                 }
                 log.d("read Done !! size : " + files.length);
             }
-            updateSkillBook();
         } catch (FileNotFoundException e) {
             log.e("db file not Found", e);
         }
@@ -75,8 +74,8 @@ public class DB {
                 JsonArray item = new JsonArray();
 
                 for (int i = 1; i <= totalPage; i++) {
-                    Call<MarketList> c = api.requestBookData(i);
-                    workList.add(api.requestBookData(i));
+                    Call<MarketList> c = api.requestBookData(i, "");
+                    workList.add(api.requestBookData(i , ""));
 
                     if (i == 1) {
                         Response<MarketList> r = c.execute();
@@ -122,31 +121,33 @@ public class DB {
 
     public ArrayList<String> getSkillBook(String skillName) {
         ArrayList<String> data = new ArrayList<>();
-        if (!db.containsKey("skillBook")) {
-            updateSkillBook();
-        }
-        JsonArray jsonData = db.get("skillBook");
-        for (int i = 0; i < jsonData.size(); i++) {
-            String bookName = String.valueOf(jsonData.get(i));
-            int temp = 0;
-            int index = -1;
-            for (int t = 0; t < skillName.length(); t++) {
-                for (int j = 0; j < bookName.length(); j++) {
-                    if (skillName.charAt(t) == bookName.charAt(j)) {
-                        if (index > j) {
-                            break;
+        if (db.containsKey("skillBook")) {
+            JsonArray jsonData = db.get("skillBook");
+            for (int i = 0; i < jsonData.size(); i++) {
+                String bookName = String.valueOf(jsonData.get(i));
+                int temp = 0;
+                int index = -1;
+                for (int t = 0; t < skillName.length(); t++) {
+                    for (int j = 0; j < bookName.length(); j++) {
+                        if (skillName.charAt(t) == bookName.charAt(j)) {
+                            if (index > j) {
+                                break;
+                            }
+                            temp++;
+                            index = j;
                         }
-                        temp++;
-                        index = j;
+                    }
+                    if (index == -1) {
+                        break;
                     }
                 }
-                if (index == -1) {
-                    break;
+                if (temp == (skillName.length())) {
+                    data.add(bookName);
                 }
             }
-            if (temp == (skillName.length())) {
-                data.add(bookName);
-            }
+        }
+        else {
+            updateSkillBook();
         }
         return data;
     }
@@ -155,7 +156,7 @@ public class DB {
         Runnable runnable = () -> {
             while (true) {
                 try {
-                    boolean flag = false;
+                    boolean flag;
                     JsonArray characterDB = new JsonArray();
                     Call<AuctionsOption> call = api.auctionsOptions();
                     Response<AuctionsOption> response = call.execute();
@@ -232,5 +233,47 @@ public class DB {
 
     private boolean checkData(String name) {
         return db.get(name) != null;
+    }
+
+    public Integer ref_getSkillBook_price(String skillName){
+        ArrayList<String> searchData = new ArrayList<>();
+        if (db.containsKey("skillBook")) {
+            JsonArray jsonData = db.get("skillBook");
+            for (int i = 0; i < jsonData.size(); i++) {
+                String bookName = String.valueOf(jsonData.get(i));
+                int temp = 0;
+                int index = -1;
+                for (int t = 0; t < skillName.length(); t++) {
+                    for (int j = 0; j < bookName.length(); j++) {
+                        if (skillName.charAt(t) == bookName.charAt(j)) {
+                            if (index > j) {
+                                break;
+                            }
+                            temp++;
+                            index = j;
+                        }
+                    }
+                    if (index == -1) {
+                        break;
+                    }
+                }
+                if (temp == (skillName.length())) {
+                    searchData.add(bookName);
+                }
+            }
+
+            if (searchData.size() == 0){
+                throw new RuntimeException("데이터 없음");
+            }
+
+            for (String data : searchData){
+                api.requestBookData(1,data);
+
+            }
+        }
+        else {
+            updateSkillBook();
+        }
+        return 1;
     }
 }

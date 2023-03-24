@@ -1,14 +1,17 @@
 import com.jcraft.jsch.*;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Vector;
 
 public class SSHServer {
     private static final String serverIP = "3.37.89.233";
     private static final int port = 22;
     private static final String user = "ubuntu";
-    private static final String rootDIR = System.getProperty("user.home") + "/server/system/";
+    private static final String Identity = System.getProperty("user.home") + "/serverbackup/server/system/key/moon.pem";
 
-    private final Log log = new Log();
     private ChannelSftp channelSftp;
     private Session session;
 
@@ -19,8 +22,7 @@ public class SSHServer {
     private void connect() {
         try {
             JSch jsch = new JSch();
-            jsch.addIdentity(rootDIR + "key/moon.pem");
-
+            jsch.addIdentity(Identity);
             session = jsch.getSession(user, serverIP, port);
             session.setConfig("StrictHostKeyChecking", "no");
             session.connect();
@@ -28,31 +30,52 @@ public class SSHServer {
             channelSftp = (ChannelSftp) session.openChannel("sftp");
             channelSftp.connect();
         } catch (JSchException e) {
-            log.e("Session connect error : ", e);
+            Log.e("Session connect error : ", e);
+            e.printStackTrace();
         }
     }
 
-    public void download(String name){
-        InputStream is = null;
-        FileOutputStream fops = null;
+    public void download() {
         try {
-            channelSftp.cd("server/system");
-            is = channelSftp.get(name);
-            fops = new FileOutputStream(rootDIR + name, false);
-            int read;
-            byte[] bytes = new byte[1024];
-            while ((read = is.read(bytes)) != -1) {
-                fops.write(bytes, 0, read);
-            }
-        } catch (SftpException e) {
-            String msg = "sftp connect error : " + e.getMessage();
-            log.e(msg , e);
-        } catch (IOException e) {
-            log.e("server File IO error : " , e);
-        }
-        finally {
+            String dbpath = "server/system";
+            downloadFile(dbpath, Paths.get(System.getProperty("user.home") + "/" + dbpath + "/"));
+        } finally {
             channelSftp.disconnect();
             session.disconnect();
+        }
+    }
+
+
+    private void downloadFile(String serverPath, Path localPath) {
+        try {
+            Vector<ChannelSftp.LsEntry> entries = channelSftp.ls(serverPath);
+
+            for (ChannelSftp.LsEntry en : entries) {
+                if (en.getFilename().equals(".") || en.getFilename().equals("..")) {
+                    continue;
+                }
+                if (!en.getFilename().equals(".") && !en.getFilename().equals("..") && en.getAttrs().isDir()) {
+                    Path path = Paths.get(localPath + "/" + en.getFilename());
+                    Files.createDirectories(path);
+                    downloadFile(serverPath + "/" + en.getFilename(), path);
+                    continue;
+                }
+
+                InputStream is = channelSftp.get(serverPath + "/" + en.getFilename());
+
+                if (!Files.exists(localPath)) {
+                    Files.createDirectories(localPath);
+                }
+                Path target = Paths.get(localPath + "/" + en.getFilename());
+                Files.copy(is, target);
+                Log.d(target.getFileName() + " : download !!");
+            }
+        } catch (SftpException e) {
+            Log.e("Session connect error : ", e);
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.e("file createDir error" + e);
+            e.printStackTrace();
         }
     }
 }
