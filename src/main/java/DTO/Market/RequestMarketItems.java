@@ -40,7 +40,7 @@ public class RequestMarketItems {
 
     @SerializedName("PageNo")
     @Expose
-    public Integer pageNo;
+    public Integer pageNo=1;
 
     @SerializedName("SortCondition")
     @Expose

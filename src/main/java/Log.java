@@ -64,7 +64,8 @@ public class Log {
             sb.append("[");
             sb.append(stackTraceElement.getClassName());
             sb.append(".");
-            sb.append(stackTraceElement.getLineNumber());
+//            sb.append(stackTraceElement.getLineNumber());
+            sb.append(stackTraceElement.getMethodName());
             sb.append("] - ");
 
             sb.append(record.getMessage());

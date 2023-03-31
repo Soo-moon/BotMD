@@ -1,6 +1,7 @@
 import com.jcraft.jsch.*;
 
 import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,6 +74,8 @@ public class SSHServer {
         } catch (SftpException e) {
             Log.e("Session connect error : ", e);
             e.printStackTrace();
+        } catch (FileAlreadyExistsException e){
+            Log.e(e.getMessage());
         } catch (IOException e) {
             Log.e("file createDir error" + e);
             e.printStackTrace();

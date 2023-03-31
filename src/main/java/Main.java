@@ -9,7 +9,10 @@ public class Main {
                 SSHServer sshServer = new SSHServer();
                 sshServer.download();
             }
-//            ServerManager serverManager = new ServerManager();
+
+            ServerManager serverManager = new ServerManager();
+            serverManager.BotStart();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

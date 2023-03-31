@@ -3,12 +3,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public enum BotCommand {
-    TRIPODS(Arrays.asList("xv", "ㅌㅍ", "트포"),0),
-    SKILLBOOK(Arrays.asList("wr", "ㅈㄱ", "전각"),10),
-    DIV_GOLD(Arrays.asList("ra", "ㄱㅁ", "경매"),1);
+    DIV_GOLD(Arrays.asList("ra", "ㄱㅁ", "경매"),0),
+    SKILLBOOK(Arrays.asList("wr", "ㅈㄱ", "전각"),1),
+    TRIPODS(Arrays.asList("xv", "ㅌㅍ", "트포"),2);
 
-    private final List<String> list;
-    private final int code;
+    public final List<String> list;
+    public final int code;
 
     BotCommand(List<String> list , int code) {
         this.list = list;
@@ -20,10 +20,6 @@ public enum BotCommand {
                 .filter(title -> title.check(command))
                 .findAny()
                 .orElseThrow(NoSuchElementException::new);
-    }
-
-    public static int code(BotCommand botCommand){
-        return botCommand.code;
     }
 
     private boolean check(String command) {

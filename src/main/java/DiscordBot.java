@@ -1,7 +1,7 @@
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.events.StatusChangeEvent;
@@ -22,49 +22,52 @@ public class DiscordBot{
             GatewayIntent.GUILD_VOICE_STATES,
             GatewayIntent.MESSAGE_CONTENT
     };
+
     private final ServerManager serverManager;
+    private final ServerListener serverListener;
     private final String botKey;
 
     private JDA jda;
 
-
-    public DiscordBot(ServerManager serverManager, String botKey) {
+    public DiscordBot(ServerManager serverManager, String botKey, ServerListener botListener) {
         this.serverManager = serverManager;
         this.botKey = botKey;
+        this.serverListener = botListener;
     }
 
     public void start(){
-        Thread botThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    jda = JDABuilder.createDefault(botKey)
-                            .enableIntents(Arrays.asList(botPermission))
-                            .setAutoReconnect(true)
-                            .build();
-
-                    jda.addEventListener(serverManager);
-                }catch (Exception e){
-                    Log.e("JDA dead" ,e);
-                }
+        Thread botThread = new Thread(() -> {
+            try {
+                jda = JDABuilder.createDefault(botKey)
+                        .enableIntents(Arrays.asList(botPermission))
+                        .build();
+                jda.addEventListener(new BotEventListener());
+            }catch (Exception e){
+                Log.e("JDA dead" ,e);
             }
         });
+        botThread.setName("botThread");
+        botThread.start();
     }
 
-    public class BotListener extends ListenerAdapter {
-        private API api;
+    public void stop() {
+        Log.d("Stop !!");
+        jda = null;
+    }
+
+    public class BotEventListener extends ListenerAdapter {
 
         @Override
         public void onReady(ReadyEvent event) {
             super.onReady(event);
-            api = serverManager.getApi();
         }
 
         @Override
         public void onStatusChange(StatusChangeEvent event) {
             Log.d(event.toString());
             if (event.getNewStatus() == JDA.Status.DISCONNECTED){
-                Log.e("");
+                Log.e("JDA.Status.DISCONNECTED");
+                serverListener.onDestroy();
             }
             super.onStatusChange(event);
         }
@@ -82,34 +85,20 @@ public class DiscordBot{
             String msg = args.get(1);
 
             try {
-                BotCommand botCommand = BotCommand.command(command);
-                switch (botCommand) {
-                    case SKILLBOOK:
-                        api.searchItem(msg, channel);
-                        break;
-                    case DIV_GOLD:
-                        divGold(channel, 1, msg);
-                        break;
-                    case TRIPODS:
-                        api.request_tripod(msg);
-                        break;
+                ArrayList<CustomEmbedBuilder> ebs = serverManager.serverRequest(command, msg);
+                for (CustomEmbedBuilder eb : ebs){
+                    channel.sendMessageEmbeds(eb.build()).queue();
                 }
-                //ref
-                EmbedBuilder eb = serverManager.serverRequest(botCommand, msg);
-                channel.sendMessageEmbeds(eb.build()).queue();
             } catch (NoSuchElementException e) {
-                channel.sendMessage("명령어 - !전각 (전각이름) , !경매 (금액)").queue();
-                log.e(e.getMessage());
+                channel.sendMessage("명령어 - !전각 (각인서이름) , !경매 (금액)").queue();
+                Log.e(e.getMessage());
             } catch (NumberFormatException e) {
                 channel.sendMessage("금액은 숫자로 입력해주세요").queue();
-                log.e(e.getMessage());
+                Log.e(e.getMessage());
             } catch (Exception e) {
                 channel.sendMessage("그런거 없어여").queue();
-                log.e(e.getMessage());
+                Log.e(e.getMessage());
             }
         }
-    }
-
-    public void divGold(MessageChannel channel, Integer recentPrice, String msg) {
     }
 }

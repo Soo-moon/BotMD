@@ -1,113 +1,72 @@
+import DTO.Market.MarketItem;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.NoSuchElementException;
 
-public class ServerManager extends ListenerAdapter {
-    private static final String config = System.getProperty("user.home") + "/server/system/config.properties";
+public class ServerManager {
+    private final ServerListener serverListener = new ServerListener() {
+        @Override
+        public void onDestroy() {
+            Log.e("FATAL onDestory !!!!");
+            Log.e("Try restart Bot");
+            bot.stop();
+            bot.start();
+        }
+    };
 
-    private final Properties prop = new Properties();
-
-    private API api;
     private DB db;
-    private DiscordBot discordBot;
+    private DiscordBot bot;
 
-    ServerManager() throws IOException {
-        prop.load(new FileInputStream(config));
+    ServerManager() {
+        try {
+            db = new DB();
 
-        String apiKey = prop.getProperty("api.key");
-        String botKey = prop.getProperty("bot.key");
+            String apiKey = db.getConfig("Api.Key");
+            API api = new API(apiKey);
+            db.setApi(api);
 
-        serverCreate(apiKey, botKey);
+            String botKey = db.getConfig("Bot.Key");
+            bot = new DiscordBot(this , botKey , serverListener);
+
+            Log.d("Init Success");
+        }
+        catch (Exception e) {
+            Log.e(e.getMessage() + "Create Fail ..");
+            e.printStackTrace();
+        }
     }
 
-    public void serverCreate(String apiKey, String botKey) {
-        discordBot = new DiscordBot(this , botKey);
-        Thread botThread = new Thread(discordBot);
-        botThread.start();
-
-        api = new API(this , apiKey);
-        db = new DB(this , api);
+    public void BotStart() {
+        bot.start();
     }
 
-    public EmbedBuilder serverRequest(BotCommand code ,String msg){
-        Log.d("server code : " +code.name());
-        EmbedBuilder eb = new EmbedBuilder();
+    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException , NoSuchElementException {
+        ArrayList<CustomEmbedBuilder> ebs = new ArrayList<>();
 
-        String title;
-        String name;
-        int gold;
-
-        switch (code){
+        switch (BotCommand.command(code)){
             case DIV_GOLD:{
-               ebBuilder(Integer.parseInt(msg) , null);
-               break;
+                CustomEmbedBuilder eb = new CustomEmbedBuilder();
+                eb.gold = Integer.parseInt(msg);
+                ebs.add(eb);
+                break;
             }
+
             case SKILLBOOK:{
-                ebBuilder(db.getSkillBook(msg) , msg);
+                for (MarketItem marketItem : db.getSkillBook(msg)){
+                    CustomEmbedBuilder eb = new CustomEmbedBuilder();
+                    eb.title = marketItem.name;
+                    eb.gold = marketItem.recentPrice;
+                    ebs.add(eb);
+                }
+
+                break;
             }
+            default: throw new NoSuchElementException();
         }
-        return eb;
-    }
 
-    private void ebBuilder(ArrayList<String> skillBook, String msg) {
-    }
-
-    public String getProperty(String key){
-        return prop.getProperty(key);
-    }
-
-    public API getApi() {
-        return api;
-    }
-
-    public DiscordBot getBot() {
-        return discordBot;
-    }
-
-    public DB getDB() {
-        return db;
-    }
-
-
-
-    public void divGold(MessageChannel channel, String msg) {
-        try {
-            int gold = Integer.parseInt(msg);
-            divGold(channel, gold,"");
-        }catch (NumberFormatException e){
-            Log.e(e.getMessage());
-        }
-    }
-
-    private void divGold(MessageChannel channel, int gold, String s) {
-    }
-
-    public EmbedBuilder ebBuilder(Integer gold , String name) throws RuntimeException{
-        try {
-            String title;
-            EmbedBuilder eb = new EmbedBuilder();
-            if (name.isEmpty()){
-                title = "경매계산기";
-            }else {
-                title = name;
-                MessageEmbed.Field field = new MessageEmbed.Field("최근거래가 : " +gold + " gold" , "",true);
-                eb.addField(field);
-            }
-            eb.setTitle(title);
-            eb.addField("4인N빵", Math.round(gold * 0.7215) + " gold", true);
-            eb.addField("4인선점", Math.round(gold * 0.64772) + " gold", true);
-            eb.addBlankField(false);
-            eb.addField("8인N빵", Math.round(gold * 0.83125) + " gold", true);
-            eb.addField("8인선점", Math.round(gold * 0.75568)+" gold", true);
-        }catch (Exception e){
-            Log.e(e.getMessage());
-        }
-        return new EmbedBuilder();
+        return ebs;
     }
 
 }

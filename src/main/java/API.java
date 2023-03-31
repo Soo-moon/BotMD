@@ -7,11 +7,9 @@ import DTO.Auctions.items.SearchDetailOption;
 import DTO.Market.MarketItem;
 import DTO.Market.MarketList;
 import DTO.Market.RequestMarketItems;
-import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -27,15 +25,9 @@ import java.util.ArrayList;
 public class API {
     private static final String baseURL = "https://developer-lostark.game.onstove.com";
 
-    private final Log log = new Log();
+    private final APIService apiService;
 
-    private final ServerManager serverManager;
-
-    private APIService apiService;
-    private DiscordBot bot;
-
-    public API(ServerManager serverManager, String apiKey) {
-        this.serverManager = serverManager;
+    public API(String apiKey) throws RuntimeException {
         try {
             final TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
@@ -58,7 +50,7 @@ public class API {
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
 
             OkHttpClient client = new OkHttpClient.Builder()
-                    .sslSocketFactory(sc.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+//                    .sslSocketFactory(sc.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
                     .addInterceptor(chain -> {
                         Request request = chain.request().newBuilder()
                                 .addHeader("accept", "application/json")
@@ -75,64 +67,55 @@ public class API {
                     .build();
 
             apiService = retrofit.create(APIService.class);
-            bot = serverManager.getBot();
+
         } catch (Exception e) {
-            log.e("API create fail", e);
+            throw new RuntimeException("API");
         }
     }
 
-    public void searchItem(String itemName, MessageChannel channel) {
-        ArrayList<String> searchData = serverManager.getDB().getSkillBook(itemName);
+    //스킬검색
+    public MarketItem searchSkillBook(String skill) {
+        MarketItem marketItem = null;
 
-        if (searchData.size() == 0) {
-            log.e("데이터 없음");
-            throw new RuntimeException();
+        RequestMarketItems requestMarketItems = new RequestMarketItems();
+        requestMarketItems.categoryCode = 40000;
+        requestMarketItems.itemGrade = "전설";
+        requestMarketItems.itemName = skill;
+
+        try {
+            Response<MarketList> response = apiService.searchItemPrice(requestMarketItems).execute();
+            if (response.code() == 200 && response.body() != null){
+                marketItem = response.body().marketItems[0];
+            }
+            else if (response.code() == 429){
+                //
+            }
+            else {
+                Log.e(response.message());
+                throw new RuntimeException("API Fail code : " + response.code());
+            }
+
+            if (marketItem == null){
+                throw new RuntimeException("API Request Fail - Item is Null");
+            }
+
+        } catch (IOException e) {
+            Log.e("API Request Fail");
+            throw new RuntimeException(e);
+        } catch (RuntimeException e){
+            Log.e(e.getMessage());
         }
-        for (String searchName : searchData) {
-            String str = searchName.replace(" 각인서", "").replace("\"", "");
-            if (str.contains("[")) {
-                str = str.split("] ")[1];
-            }
 
-            Response<MarketList> response;
-            try {
-                Call<MarketList> call = requestBookData(1, str);
-                response = call.execute();
-            } catch (IOException e) {
-                log.e("searchItem call error", e);
-                throw new RuntimeException(e);
-            }
-
-            if (response.code() == 200 && response.body() != null) {
-                MarketItem marketItem = response.body().marketItems[0];
-                if (response.body().totalCount > 1) {
-                    for (MarketItem items : response.body().marketItems) {
-                        if (items.name.equals(searchName)) {
-                            marketItem = items;
-                        }
-                    }
-                }
-
-                if (channel != null) {
-                    bot.divGold(channel, marketItem.recentPrice, marketItem.name);
-                }
-
-            } else {
-                if (channel != null) {
-                    channel.sendMessage("api error code : " + response.code()).queue();
-                }
-
-                log.e("searchItem api connect error code: " + response.code());
-                throw new RuntimeException("searchItem api connect error code: " + response.code());
-            }
-        }
+        return marketItem;
     }
 
+
+    //test
     public void request_tripod(String className) {
         try {
             ArrayList<Call<Auction>> callList = new ArrayList<>();
 
-            ArrayList<ApiSearchTripod> tripodList = serverManager.getDB().getCharacterDB(className);
+            ArrayList<ApiSearchTripod> tripodList = new ArrayList<>(); //todo tripodList get
             for (ApiSearchTripod option : tripodList) {
                 SearchDetailOption searchDetailOption = new SearchDetailOption();
                 searchDetailOption.FirstOption = option.FirstOption;
@@ -187,16 +170,5 @@ public class API {
 
     public Call<AuctionsOption> auctionsOptions() {
         return apiService.auctionsOptions();
-    }
-
-    public Call<MarketList> requestBookData(int page, String name) {
-        RequestMarketItems requestMarketItems = new RequestMarketItems();
-        requestMarketItems.categoryCode = 40000;
-        requestMarketItems.itemGrade = "전설";
-        requestMarketItems.itemName = name;
-        if (page != 1) {
-            requestMarketItems.pageNo = page;
-        }
-        return apiService.searchItemPrice(requestMarketItems);
     }
 }
