@@ -1,20 +1,25 @@
-import DTO.ItemDTO;
-import DTO.ItemSearchParam;
+import DTO.Auctions.Options.AuctionsOption;
+import DTO.Auctions.items.Auction;
+import DTO.Auctions.items.RequestAuctionItems;
+import DTO.Market.MarketList;
+import DTO.Market.RequestMarketItems;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.Field;
-import retrofit2.http.FormUrlEncoded;
-import retrofit2.http.POST;
+import retrofit2.http.*;
 
 public interface APIService {
 
+    @GET("/auctions/options")
+    Call<AuctionsOption> auctionsOptions();
+
+    @POST("/auctions/items")
+    Call<Auction> auctions_Items(@Body RequestAuctionItems requestAuctionItems);
 
     @POST("/markets/items")
-    Call<ItemDTO> searchItemPrice(@Body ItemSearchParam itemSearchParam);
+    Call<MarketList> searchItemPrice(@Body RequestMarketItems requestMarketItems);
 
     @FormUrlEncoded
     @POST("/markets/items")
-    Call<ItemDTO> searchItemPrice(@Field("CategoryCode") String categoryCode , @Field("ItemGrade") String ItemGrade , @Field("ItemTier")Integer ItemTier, @Field("ItemName")String ItemName);
+    Call<MarketList> searchItemPrice(@Field("CategoryCode") String categoryCode , @Field("ItemGrade") String ItemGrade , @Field("ItemTier")Integer ItemTier, @Field("ItemName")String ItemName);
 }
 
 /** CategoryCode
@@ -236,7 +241,6 @@ public interface APIService {
  *         }
  *     ],
  */
-
 /**     auctionsCategories
  * "Categories": [
  {
