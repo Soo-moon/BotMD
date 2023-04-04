@@ -1,49 +1,72 @@
-import com.jcraft.jsch.*;
+import DTO.Market.MarketItem;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
-import java.io.*;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 public class ServerManager {
-    public Boolean isTest = System.getProperty("os.name").contains("Windows");
-
-    private API api;
-    private final DB db = new DB(this);;
-
-    private final DiscordBot bot = new DiscordBot();
-    private final Properties serverProp = new Properties();
-
-    ServerManager() throws SftpException, IOException {
-        if (isTest) {
-            SSHServer sshServer = new SSHServer();
-            sshServer.download(Word.propFileName);
+    private final ServerListener serverListener = new ServerListener() {
+        @Override
+        public void onDestroy() {
+            Log.e("FATAL onDestory !!!!");
+            Log.e("Try restart Bot");
+            bot.stop();
+            bot.start();
         }
+    };
 
-        serverProp.load(new FileInputStream(Word.propFile));
+    private DB db;
+    private DiscordBot bot;
 
-        ServiceStart();
-    }
-
-    public void ServiceStart() {
+    ServerManager() {
         try {
-            api = new API(this , prop("api.url"), prop("api.key"));
-            bot.create(prop("bot.key"),this);
-            db.create();
+            db = new DB();
+
+            String apiKey = db.getConfig("Api.key");
+            API api = new API(apiKey);
+            db.setApi(api);
+
+            String botKey = db.getConfig("Bot.Key");
+            bot = new DiscordBot(this, botKey, serverListener);
+
+            Log.d("Init Success");
         } catch (Exception e) {
-            throw new RuntimeException("server create error ", e);
+            Log.e(e.getMessage() + "Create Fail ..");
+            e.printStackTrace();
         }
     }
 
-    public String prop(String key){
-        return serverProp.getProperty(key);
+    public void BotStart() {
+        bot.start();
     }
 
-    public API getApi(){
-        return api;
+    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException, NoSuchElementException {
+        ArrayList<CustomEmbedBuilder> ebs = new ArrayList<>();
+
+        switch (BotCommand.command(code)) {
+            case DIV_GOLD: {
+                CustomEmbedBuilder eb = new CustomEmbedBuilder();
+                eb.gold = Integer.parseInt(msg);
+                ebs.add(eb);
+                break;
+            }
+
+            case SKILLBOOK: {
+                for (MarketItem marketItem : db.getSkillBook(msg)) {
+                    CustomEmbedBuilder eb = new CustomEmbedBuilder();
+                    eb.title = marketItem.name;
+                    eb.gold = marketItem.recentPrice;
+                    ebs.add(eb);
+                }
+
+                break;
+            }
+            default:
+                throw new NoSuchElementException();
+        }
+
+        return ebs;
     }
-
-    public DiscordBot getBot(){return bot;}
-
-    public DB getDB(){return db;}
-
 
 }
