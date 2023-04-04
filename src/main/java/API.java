@@ -75,8 +75,8 @@ public class API {
     }
 
     //스킬검색
-    public MarketItem searchSkillBook(String skill) {
-        MarketItem marketItem = null;
+    public MarketItem[] searchSkillBook(String skill) {
+        MarketItem[] marketItem = null;
 
         RequestMarketItems requestMarketItems = new RequestMarketItems();
         requestMarketItems.categoryCode = 40000;
@@ -86,7 +86,7 @@ public class API {
         try {
             Response<MarketList> response = apiService.searchItemPrice(requestMarketItems).execute();
             if (response.code() == 200 && response.body() != null) {
-                marketItem = response.body().marketItems[0];
+                marketItem = response.body().marketItems;
             } else if (response.code() == 429) {
                 //
             } else {

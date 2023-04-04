@@ -98,8 +98,16 @@ public class DB {
             }
 
             for (String skill : dataList) {
-                MarketItem marketItem = api.searchSkillBook(skill);
-                data.add(marketItem);
+                MarketItem[] marketItem = api.searchSkillBook(skill);
+                for (MarketItem target : marketItem){
+                    if (!data.contains(target)){
+                        Log.d("MarketItem add ! - " + target.name);
+                        Log.d("info.recentPrice : " + target.recentPrice);
+                        Log.d("info.currentMinPrice : " + target.currentMinPrice);
+                        data.add(target);
+                    }
+                }
+
             }
 
         } else {

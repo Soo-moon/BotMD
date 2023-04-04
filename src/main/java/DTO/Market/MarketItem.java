@@ -54,4 +54,14 @@ public class MarketItem {
     @SerializedName("CurrentMinPrice")
     @Expose
     public Integer currentMinPrice;
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.hashCode() == obj.hashCode();
+    }
 }
