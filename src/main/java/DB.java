@@ -76,7 +76,12 @@ public class DB {
                     }
                 }
                 if (temp == (name.length())) {
-                    dataList.add(bookName);
+                    String target = bookName.replace(" 각인서","");
+                    target = target.replace("\"" , "");
+                    if (target.contains("[")){
+                        target = target.split("] ")[1];
+                    }
+                    dataList.add(target);
                 }
             }
 

@@ -23,16 +23,15 @@ public class ServerManager {
         try {
             db = new DB();
 
-            String apiKey = db.getConfig("Api.Key");
+            String apiKey = db.getConfig("Api.key");
             API api = new API(apiKey);
             db.setApi(api);
 
             String botKey = db.getConfig("Bot.Key");
-            bot = new DiscordBot(this , botKey , serverListener);
+            bot = new DiscordBot(this, botKey, serverListener);
 
             Log.d("Init Success");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e(e.getMessage() + "Create Fail ..");
             e.printStackTrace();
         }
@@ -42,19 +41,19 @@ public class ServerManager {
         bot.start();
     }
 
-    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException , NoSuchElementException {
+    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException, NoSuchElementException {
         ArrayList<CustomEmbedBuilder> ebs = new ArrayList<>();
 
-        switch (BotCommand.command(code)){
-            case DIV_GOLD:{
+        switch (BotCommand.command(code)) {
+            case DIV_GOLD: {
                 CustomEmbedBuilder eb = new CustomEmbedBuilder();
                 eb.gold = Integer.parseInt(msg);
                 ebs.add(eb);
                 break;
             }
 
-            case SKILLBOOK:{
-                for (MarketItem marketItem : db.getSkillBook(msg)){
+            case SKILLBOOK: {
+                for (MarketItem marketItem : db.getSkillBook(msg)) {
                     CustomEmbedBuilder eb = new CustomEmbedBuilder();
                     eb.title = marketItem.name;
                     eb.gold = marketItem.recentPrice;
@@ -63,7 +62,8 @@ public class ServerManager {
 
                 break;
             }
-            default: throw new NoSuchElementException();
+            default:
+                throw new NoSuchElementException();
         }
 
         return ebs;

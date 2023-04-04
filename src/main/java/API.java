@@ -10,6 +10,7 @@ import DTO.Market.RequestMarketItems;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -50,7 +51,7 @@ public class API {
             sc.init(null, trustAllCerts, new java.security.SecureRandom());
 
             OkHttpClient client = new OkHttpClient.Builder()
-//                    .sslSocketFactory(sc.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
+                    .sslSocketFactory(sc.getSocketFactory(), (X509TrustManager) trustAllCerts[0])
                     .addInterceptor(chain -> {
                         Request request = chain.request().newBuilder()
                                 .addHeader("accept", "application/json")
@@ -84,31 +85,28 @@ public class API {
 
         try {
             Response<MarketList> response = apiService.searchItemPrice(requestMarketItems).execute();
-            if (response.code() == 200 && response.body() != null){
+            if (response.code() == 200 && response.body() != null) {
                 marketItem = response.body().marketItems[0];
-            }
-            else if (response.code() == 429){
+            } else if (response.code() == 429) {
                 //
-            }
-            else {
+            } else {
                 Log.e(response.message());
                 throw new RuntimeException("API Fail code : " + response.code());
             }
 
-            if (marketItem == null){
+            if (marketItem == null) {
                 throw new RuntimeException("API Request Fail - Item is Null");
             }
 
         } catch (IOException e) {
             Log.e("API Request Fail");
             throw new RuntimeException(e);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             Log.e(e.getMessage());
         }
 
         return marketItem;
     }
-
 
     //test
     public void request_tripod(String className) {
