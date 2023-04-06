@@ -90,7 +90,7 @@ public class DB {
                 throw new RuntimeException();
             }
 
-            Log.d("dataList Size .. " + dataList.size());
+            Log.d("dataList Size .. [ " + dataList.size() + " ]");
 
             if (api == null){
                 Log.e("API Not Found");
