@@ -15,6 +15,7 @@ public class CustomEmbedBuilder extends EmbedBuilder {
         }
         else {
             addField("최근거래가 : " +gold + " gold" , "",true);
+            addBlankField(false);
         }
 
         setTitle(this.title);
