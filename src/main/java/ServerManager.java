@@ -10,7 +10,6 @@ public class ServerManager {
         @Override
         public void onDestroy() {
             Log.e("FATAL onDestory !!!!");
-            Log.e("Try restart Bot");
             bot.stop();
             bot.start();
         }

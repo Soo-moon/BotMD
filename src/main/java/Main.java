@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             Log.init();
-
+            Log.d("boot");
             if (isTest) {
                 SSHServer sshServer = new SSHServer();
                 sshServer.download();
