@@ -11,7 +11,7 @@ public class SSHServer {
     private static final String serverIP = "3.37.89.233";
     private static final int port = 22;
     private static final String user = "ubuntu";
-    private static final String Identity = System.getProperty("user.home") + "/serverbackup/server/system/key/moon.pem";
+    private static final String Identity = System.getProperty("user.home") + "/key/moon.pem";
 
     private ChannelSftp channelSftp;
     private Session session;
