@@ -8,10 +8,10 @@ import java.nio.file.Paths;
 import java.util.Vector;
 
 public class SSHServer {
-    private static final String serverIP = "3.37.89.233";
+    private static final String serverIP = "34.138.201.68";
     private static final int port = 22;
-    private static final String user = "ubuntu";
-    private static final String Identity = System.getProperty("user.home") + "/serverbackup/server/system/key/moon.pem";
+    private static final String user = "md";
+    private static final String Identity = System.getProperty("user.home") + "/key/gcp_mdKey.pem";
 
     private ChannelSftp channelSftp;
     private Session session;
