@@ -52,6 +52,7 @@ public class DiscordBot{
 
     public void stop() {
         Log.d("Stop !!");
+        jda.shutdownNow();
         jda = null;
     }
 
@@ -96,7 +97,10 @@ public class DiscordBot{
             } catch (NumberFormatException e) {
                 channel.sendMessage("금액은 숫자로 입력해주세요").queue();
                 Log.e(e.getMessage());
-            } catch (Exception e) {
+            } catch (InterruptedException e){
+                Log.e("DISCONNECT !!");
+            }
+            catch (Exception e) {
                 channel.sendMessage("그런거 없어여").queue();
                 Log.e(e.getMessage());
             }

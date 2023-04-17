@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 public enum BotCommand {
     DIV_GOLD(Arrays.asList("ra", "ㄱㅁ", "경매"),0),
     SKILLBOOK(Arrays.asList("wr", "ㅈㄱ", "전각"),1),
-    TRIPODS(Arrays.asList("xv", "ㅌㅍ", "트포"),2);
+    TRIPODS(Arrays.asList("xv", "ㅌㅍ", "트포"),2),
+    DISCONNECT(Arrays.asList("DISCONNECT"),3);
 
     public final List<String> list;
     public final int code;
