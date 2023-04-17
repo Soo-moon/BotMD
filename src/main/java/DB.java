@@ -119,7 +119,7 @@ public class DB {
 
     private void makeFile(String name, byte[] b) {
         try {
-            String fileName = rootDir + "/db/" + name;
+            String fileName = rootDir + "db/" + name;
             File file = new File(fileName);
             if (!file.exists()){
                 if (!file.getParentFile().exists()){
