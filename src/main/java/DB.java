@@ -3,7 +3,6 @@ import DTO.Auctions.Options.AuctionsOption;
 import DTO.Auctions.Options.SkillOption;
 import DTO.Auctions.Options.Tripods;
 import DTO.Market.MarketItem;
-import DTO.Market.MarketList;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -76,9 +75,9 @@ public class DB {
                     }
                 }
                 if (temp == (name.length())) {
-                    String target = bookName.replace(" 각인서","");
-                    target = target.replace("\"" , "");
-                    if (target.contains("[")){
+                    String target = bookName.replace(" 각인서", "");
+                    target = target.replace("\"", "");
+                    if (target.contains("[")) {
                         target = target.split("] ")[1];
                     }
                     dataList.add(target);
@@ -92,15 +91,15 @@ public class DB {
 
             Log.d("dataList Size .. [ " + dataList.size() + " ]");
 
-            if (api == null){
+            if (api == null) {
                 Log.e("API Not Found");
                 throw new RuntimeException();
             }
 
             for (String skill : dataList) {
                 MarketItem[] marketItem = api.searchSkillBook(skill);
-                for (MarketItem target : marketItem){
-                    if (!data.contains(target)){
+                for (MarketItem target : marketItem) {
+                    if (!data.contains(target)) {
                         Log.d("MarketItem add ! - " + target.name);
                         Log.d("info.recentPrice : " + target.recentPrice);
                         Log.d("info.currentMinPrice : " + target.currentMinPrice);
@@ -120,8 +119,14 @@ public class DB {
 
     private void makeFile(String name, byte[] b) {
         try {
-            String fileName = rootDir + "name";
+            String fileName = rootDir + "/db/" + name;
             File file = new File(fileName);
+            if (!file.exists()){
+                if (!file.getParentFile().exists()){
+                    file.getParentFile().mkdir();
+                }
+                file.createNewFile();
+            }
             BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file, false));
             fileOutputStream.write(b);
             fileOutputStream.flush();
@@ -179,6 +184,72 @@ public class DB {
         thread.start();
     }
 
+    public void createClassData() {
+        Call<AuctionsOption> call = api.auctionsOptions();
+
+        Response<AuctionsOption> response = null;
+        try {
+            response = call.execute();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+//        Tripods tripods = new Tripods();
+//        tripods.IsGem = false;
+//        tripods.Text = "testtest 한글";
+//        tripods.Value = 1;
+//        Gson gson = new Gson();
+//        String test = gson.toJson(tripods);
+//        System.out.println(test);
+//        JsonObject jsonObject = (JsonObject) JsonParser.parseString(test);
+//        System.out.println(jsonObject);
+
+
+        if (response.isSuccessful() && response.body() != null) {
+            long startTime = System.currentTimeMillis();
+
+            HashMap<String, JsonArray> classData = new HashMap<>();
+
+            for (SkillOption skillOption : response.body().SkillOption) {
+                if (!skillOption.IsSkillGroup) {
+                    if (classData.get(skillOption.Class) == null) {
+                        JsonArray jsonArray = new JsonArray();
+                        classData.put(skillOption.Class, jsonArray);
+                    }
+
+                    ApiSearchTripod apiSearchTripod = new ApiSearchTripod();
+                    JsonArray apiSearchArray = new JsonArray();
+                    JsonArray jsonArray = classData.get(skillOption.Class);
+
+                    for (Tripods tripods : skillOption.Tripods) {
+                        if (tripods.IsGem) {
+                            continue;
+                        }
+                        JsonObject jsonObject = (JsonObject) JsonParser.parseString(new Gson().toJson(tripods));
+                        apiSearchArray.add(jsonObject);
+                    }
+
+                    apiSearchTripod.FirstOption = skillOption.Value;
+                    apiSearchTripod.SkillName = skillOption.Text;
+                    apiSearchTripod.tripods = apiSearchArray;
+
+                    JsonObject jsonObject = (JsonObject) JsonParser.parseString(new Gson().toJson(apiSearchTripod));
+                    jsonArray.add(jsonObject);
+
+                    classData.put(skillOption.Class , jsonArray);
+                }
+            }
+
+            for (String className : classData.keySet()){
+                byte[] b = classData.get(className).toString().getBytes();
+                System.out.println("className : " +className + " size : " +b.length);
+                makeFile("class/" + className ,b);
+            }
+
+            System.out.println("createClass Time " + (System.currentTimeMillis() - startTime) + "ms");
+        }
+    }
+
     public ArrayList<ApiSearchTripod> getCharacterDB(String className) {
         ArrayList<ApiSearchTripod> apiSearchTripods = new ArrayList<>();
 
@@ -194,7 +265,7 @@ public class DB {
                     apiSearchTripod.SkillName = skillName;
                     apiSearchTripod.FirstOption = jsonObject.get("FirstOption").getAsInt();
                 }
-                apiSearchTripod.tripods = tripods;
+//                apiSearchTripod.tripods = tripods;
                 apiSearchTripods.add(apiSearchTripod);
             }
         } catch (FileNotFoundException e) {

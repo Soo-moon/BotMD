@@ -13,6 +13,11 @@ public class ServerManager {
             bot.stop();
             bot.start();
         }
+
+        @Override
+        public void onReady() {
+            db.createClassData();
+        }
     };
 
     private DB db;

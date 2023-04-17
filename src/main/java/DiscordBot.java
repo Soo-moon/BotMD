@@ -60,11 +60,11 @@ public class DiscordBot{
         @Override
         public void onReady(ReadyEvent event) {
             super.onReady(event);
+            serverListener.onReady();
         }
 
         @Override
         public void onStatusChange(StatusChangeEvent event) {
-            Log.d(event.toString());
             if (event.getNewStatus() == JDA.Status.DISCONNECTED){
                 Log.e("JDA.Status.DISCONNECTED");
                 serverListener.onDestroy();

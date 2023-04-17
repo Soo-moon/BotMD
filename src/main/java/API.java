@@ -1,5 +1,6 @@
 import DTO.ApiSearchTripod;
 import DTO.Auctions.Options.AuctionsOption;
+import DTO.Auctions.Options.SkillOption;
 import DTO.Auctions.items.Auction;
 import DTO.Auctions.items.AuctionItem;
 import DTO.Auctions.items.RequestAuctionItems;
@@ -117,11 +118,11 @@ public class API {
             for (ApiSearchTripod option : tripodList) {
                 SearchDetailOption searchDetailOption = new SearchDetailOption();
                 searchDetailOption.FirstOption = option.FirstOption;
-                for (String tripodKey : option.tripods.keySet()) {
-                    searchDetailOption.SecondOption = option.tripods.get(tripodKey).getAsInt();
-                    Call<Auction> call = auctions_Item_Tripods(className, searchDetailOption);
-                    callList.add(call);
-                }
+//                for (String tripodKey : option.tripods.keySet()) {
+//                    searchDetailOption.SecondOption = option.tripods.get(tripodKey).getAsInt();
+//                    Call<Auction> call = auctions_Item_Tripods(className, searchDetailOption);
+//                    callList.add(call);
+//                }
             }
             Runnable runnable = () -> {
                 while (!callList.isEmpty()) {
@@ -139,15 +140,17 @@ public class API {
                                 }
                                 System.out.println("ItemPrice " + (totalItemPrice / totalCount));
                                 callList.remove(call);
-                            } else {
-                                System.out.println("error sleep 1min");
-                                Thread.sleep(65000);
                             }
                         } catch (IOException e) {
                             throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
                         }
+                    }
+                    try {
+                        if (!callList.isEmpty()){
+                            Thread.sleep(65000);
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             };
