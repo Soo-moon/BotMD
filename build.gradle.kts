@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.ms"
-version = "1.09"
+version = "1.09_Fix"
 
 repositories {
     mavenCentral()

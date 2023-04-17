@@ -64,7 +64,7 @@ public class DiscordBot{
 
         @Override
         public void onStatusChange(StatusChangeEvent event) {
-            Log.d(event.toString());
+//            Log.d(event.toString());
             if (event.getNewStatus() == JDA.Status.DISCONNECTED){
                 Log.e("JDA.Status.DISCONNECTED");
                 serverListener.onDestroy();
@@ -78,6 +78,7 @@ public class DiscordBot{
             Message message = event.getMessage();
             MessageChannel channel = event.getChannel();
 
+            Log.d("message : " + message);
             if (user.isBot() || !message.getContentRaw().startsWith(prefix)) return;
 
             ArrayList<String> args = new ArrayList<>(Arrays.asList(message.getContentRaw().split(" ")));
