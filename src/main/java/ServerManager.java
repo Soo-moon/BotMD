@@ -45,7 +45,7 @@ public class ServerManager {
         bot.start();
     }
 
-    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException, NoSuchElementException {
+    public ArrayList<CustomEmbedBuilder> serverRequest(String code, String msg) throws NumberFormatException, NoSuchElementException, InterruptedException {
         ArrayList<CustomEmbedBuilder> ebs = new ArrayList<>();
 
         switch (BotCommand.command(code)) {
@@ -65,6 +65,12 @@ public class ServerManager {
                 }
 
                 break;
+            }
+
+            case DISCONNECT:{
+                Log.d("DISCONNECT .. ");
+                bot.stop();
+                throw new InterruptedException();
             }
             default:
                 throw new NoSuchElementException();
