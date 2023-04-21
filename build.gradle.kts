@@ -1,3 +1,5 @@
+import kotlin.jvm.internal.Intrinsics.Kotlin
+
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -31,6 +33,11 @@ tasks.shadowJar {
         val file = File("build/libs/system/version.txt")
             .writeText("${project.version}")
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.getByName<Test>("test") {

@@ -75,7 +75,7 @@ public class SSHServer {
             Log.e("Session connect error : ", e);
             e.printStackTrace();
         } catch (FileAlreadyExistsException e){
-            Log.e(e.getMessage());
+            //
         } catch (IOException e) {
             Log.e("file createDir error" + e);
             e.printStackTrace();

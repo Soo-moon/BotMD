@@ -12,6 +12,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class DB {
@@ -24,20 +26,28 @@ public class DB {
     private API api;
 
     public DB() throws IOException {
-        config.load(new FileInputStream(rootDir + "config.properties"));
-
-        File[] files = new File(rootDir + "db/").listFiles();
-        if (files != null && files.length > 0) {
-            for (File file : files) {
-                JsonReader jsonReader = new JsonReader(new BufferedReader(new FileReader(file)));
-                jsonReader.setLenient(true);
-                JsonArray jsonArray = JsonParser.parseReader(jsonReader).getAsJsonArray();
-                db.put(file.getName(), jsonArray);
-                Log.d("read DataFile : " + file.getName());
-            }
-        }
+        config.load(Files.newInputStream(Paths.get(rootDir + "config.properties")));
+        readDB(rootDir + "db/");
 
         Log.d("DB init !!");
+    }
+
+    private void readDB(String path) throws FileNotFoundException {
+        File[] files = new File(path).listFiles();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                if (file.isDirectory()){
+                    readDB(file.getPath());
+                }
+                else {
+                    JsonReader jsonReader = new JsonReader(new BufferedReader(new FileReader(file)));
+                    jsonReader.setLenient(true);
+                    JsonArray jsonArray = JsonParser.parseReader(jsonReader).getAsJsonArray();
+                    db.put(file.getName(), jsonArray);
+                }
+                Log.d("read Data : \"" + file.getName() + "\"");
+            }
+        }
     }
 
     public void setApi(API api) {
@@ -184,6 +194,8 @@ public class DB {
         thread.start();
     }
 
+
+    //t
     public void createClassData() {
         Call<AuctionsOption> call = api.auctionsOptions();
 

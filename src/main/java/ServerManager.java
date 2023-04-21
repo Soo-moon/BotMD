@@ -36,7 +36,7 @@ public class ServerManager {
 
             Log.d("Init Success");
         } catch (Exception e) {
-            Log.e(e.getMessage() + "Create Fail ..");
+            Log.e(e.getMessage() + " Create Fail ..");
             e.printStackTrace();
         }
     }
