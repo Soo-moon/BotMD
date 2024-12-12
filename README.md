@@ -1,6 +1,6 @@
 # 로스트아크 경매 /전각 가격 계산 bot
 
-discord 용 bot 프로그램
+discord 용 bot 프로그램<br>
 서버 ec2 -> gcp 
 
 <br>
